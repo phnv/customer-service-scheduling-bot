@@ -1,0 +1,21 @@
+[project]
+name = "customer-service-scheduling-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "chromadb>=1.5.9",
+    "jupyter>=1.1.1",
+    "langchain>=1.3.12",
+    "langchain-anthropic>=1.4.8",
+    "langchain-core>=1.4.9",
+    "langchain-google-genai>=4.2.7",
+    "langchain-openai>=1.3.5",
+    "langgraph>=1.2.9",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.2",
+    "sentence-transformers>=5.6.0",
+    "sqlmodel>=0.0.39",
+    "streamlit>=1.59.1",
+]

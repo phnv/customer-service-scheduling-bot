@@ -1,0 +1,17 @@
+service_id,doctor_id,specialty,service_type,service_mode,price,is_active
+1,1,Psychology,initial,in_person,120,1
+2,1,Psychology,return,online,84,1
+3,2,Pediatrics,initial,in_person,140,1
+4,2,Pediatrics,return,online,98,1
+5,3,Gastroenterology,initial,in_person,180,1
+6,3,Gastroenterology,return,online,126,1
+7,4,Endocrinology,initial,in_person,170,1
+8,4,Endocrinology,return,online,119,1
+9,5,Family Medicine,initial,in_person,100,1
+10,5,Family Medicine,return,online,70,1
+11,6,Family Medicine,initial,in_person,95,1
+12,6,Family Medicine,return,online,66,1
+13,7,Dentistry,initial,in_person,150,1
+14,7,Dentistry,return,online,105,1
+15,8,Ophthalmology,initial,in_person,160,1
+16,8,Ophthalmology,return,online,112,1

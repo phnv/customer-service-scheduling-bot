@@ -1,0 +1,9 @@
+doctor_id,registry_number,full_name,email,is_active
+1,PSY1001,Dr. Emily Carter,emily@clinic.demo,1
+2,PED1002,Dr. Michael Reed,michael@clinic.demo,1
+3,GAS1003,Dr. Sarah Collins,sarah@clinic.demo,1
+4,END1004,Dr. David Brooks,david@clinic.demo,1
+5,FAM1005,Dr. Jennifer Adams,jennifer@clinic.demo,1
+6,FAM1006,Dr. Robert King,robert@clinic.demo,1
+7,DEN1007,Dr. Laura White,laura@clinic.demo,1
+8,OPH1008,Dr. Daniel Scott,daniel@clinic.demo,1
