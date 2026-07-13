@@ -46,6 +46,7 @@ class AppointmentStatus(str, enum.Enum):
 # Models
 class Doctor(SQLModel, table=True):
     __tablename__ = "doctors"
+    __table_args__ = {'extend_existing': True}
     doctor_id: str = Field(primary_key=True)
     registry_number: Optional[str] = None
     full_name: str
@@ -56,11 +57,13 @@ class Doctor(SQLModel, table=True):
 
 class DoctorSpecialty(SQLModel, table=True):
     __tablename__ = "doctor_specialties"
+    __table_args__ = {'extend_existing': True}
     doctor_id: str = Field(primary_key=True, foreign_key="doctors.doctor_id")
     specialty: str = Field(primary_key=True)
 
 class Service(SQLModel, table=True):
     __tablename__ = "services"
+    __table_args__ = {'extend_existing': True}
     service_id: str = Field(primary_key=True)
     doctor_id: str = Field(foreign_key="doctors.doctor_id")
     specialty: str
@@ -73,6 +76,7 @@ class Service(SQLModel, table=True):
 
 class Contact(SQLModel, table=True):
     __tablename__ = "contacts"
+    __table_args__ = {'extend_existing': True}
     contact_id: str = Field(primary_key=True)
     full_name: str
     email: Optional[str] = None
@@ -84,6 +88,7 @@ class Contact(SQLModel, table=True):
 
 class Patient(SQLModel, table=True):
     __tablename__ = "patients"
+    __table_args__ = {'extend_existing': True}
     patient_id: str = Field(primary_key=True)
     contact_id: str = Field(foreign_key="contacts.contact_id")
     full_name: str
@@ -94,6 +99,7 @@ class Patient(SQLModel, table=True):
 
 class Conversation(SQLModel, table=True):
     __tablename__ = "conversations"
+    __table_args__ = {'extend_existing': True}
     conversation_id: str = Field(primary_key=True)
     contact_id: str = Field(foreign_key="contacts.contact_id")
     patient_id: Optional[str] = Field(default=None, foreign_key="patients.patient_id")
@@ -103,6 +109,7 @@ class Conversation(SQLModel, table=True):
 
 class LeadQualification(SQLModel, table=True):
     __tablename__ = "lead_qualification"
+    __table_args__ = {'extend_existing': True}
     conversation_id: str = Field(primary_key=True, foreign_key="conversations.conversation_id")
     converted: Optional[bool] = None
     blocker: Optional[str] = None
@@ -118,6 +125,7 @@ class LeadQualification(SQLModel, table=True):
 
 class AvailabilitySlot(SQLModel, table=True):
     __tablename__ = "availability_slots"
+    __table_args__ = {'extend_existing': True}
     slot_id: str = Field(primary_key=True)
     doctor_id: str = Field(foreign_key="doctors.doctor_id")
     service_id: str = Field(foreign_key="services.service_id")
@@ -130,6 +138,7 @@ class AvailabilitySlot(SQLModel, table=True):
 
 class Reservation(SQLModel, table=True):
     __tablename__ = "reservations"
+    __table_args__ = {'extend_existing': True}
     reservation_id: str = Field(primary_key=True)
     slot_id: str = Field(foreign_key="availability_slots.slot_id")
     conversation_id: str = Field(foreign_key="conversations.conversation_id")
@@ -139,6 +148,7 @@ class Reservation(SQLModel, table=True):
 
 class Appointment(SQLModel, table=True):
     __tablename__ = "appointments"
+    __table_args__ = {'extend_existing': True}
     appointment_id: str = Field(primary_key=True)
     patient_id: str = Field(foreign_key="patients.patient_id")
     contact_id: str = Field(foreign_key="contacts.contact_id")
@@ -156,6 +166,7 @@ class Appointment(SQLModel, table=True):
 
 class Payment(SQLModel, table=True):
     __tablename__ = "payments"
+    __table_args__ = {'extend_existing': True}
     payment_id: str = Field(primary_key=True)
     appointment_id: str = Field(foreign_key="appointments.appointment_id")
     order_key: Optional[str] = None
@@ -172,6 +183,7 @@ class Payment(SQLModel, table=True):
 
 class ApiErrorLog(SQLModel, table=True):
     __tablename__ = "api_error_log"
+    __table_args__ = {'extend_existing': True}
     log_id: str = Field(primary_key=True)
     created_at: datetime
     severity: str
