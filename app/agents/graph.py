@@ -12,7 +12,7 @@ Persistence: MemorySaver in-process checkpointer.
   - State is lost on process restart (acceptable for a portfolio project).
 
 Public API:
-  run_agent(user_message: str, conversation_id: str) -> str
+  run_agent(user_message: str, conversation_id: str) -> tuple[str, dict[str, Any]]
     Called by the Streamlit UI on each user message.
 """
 
@@ -31,6 +31,7 @@ from app.agents.coordinator import coordinator_node, route_after_coordinator
 from app.agents.faq_agent import faq_node
 from app.agents.reception_agent import reception_node
 from app.agents.state import AgentState
+from app.agents.utils import extract_text_content
 from app.prompts.prompts import ESCALATION_MESSAGE
 
 logger = logging.getLogger(__name__)
@@ -103,11 +104,11 @@ _graph = _build_graph()
 # Public API
 # ---------------------------------------------------------------------------
 
-def run_agent(user_message: str, conversation_id: str | None = None) -> str:
+def run_agent(user_message: str, conversation_id: str | None = None) -> tuple[str, dict[str, Any]]:
     """
-    Process a user message through the multi-agent pipeline and return the response.
+    Process a user message through the multi-agent pipeline and return the response and state.
 
-    This is the single entry point called by the Streamlit UI.
+    This is the single entry point called by the Streamlit UI (via ChatApplication).
 
     Args:
         user_message: The raw text sent by the user.
@@ -115,7 +116,7 @@ def run_agent(user_message: str, conversation_id: str | None = None) -> str:
                          If None, a new UUID is generated (single-turn usage).
 
     Returns:
-        The agent's response as a plain string.
+        A tuple of (agent_response_string, final_agent_state_dict).
     """
     if not conversation_id:
         conversation_id = str(uuid.uuid4())
@@ -139,6 +140,10 @@ def run_agent(user_message: str, conversation_id: str | None = None) -> str:
         "patient_id": None,
         "active_reservation_id": None,
         "intent": None,
+        "retrieved_docs": None,
+        "ui_payment_url": None,
+        "ui_show_confirm_payment": False,
+        "ui_show_expire_payment": False,
     }
 
     result = _graph.invoke(initial_state, config=config)
@@ -147,7 +152,7 @@ def run_agent(user_message: str, conversation_id: str | None = None) -> str:
     response = _extract_last_ai_message(result)
     logger.info(f"[Graph] Response: {response[:120]!r}{'...' if len(response) > 120 else ''}")
 
-    return response
+    return response, result
 
 
 def _extract_last_ai_message(state: dict[str, Any]) -> str:
@@ -159,8 +164,10 @@ def _extract_last_ai_message(state: dict[str, Any]) -> str:
     messages = state.get("messages", [])
 
     for msg in reversed(messages):
-        if isinstance(msg, AIMessage) and msg.content:
-            return str(msg.content)
+        if isinstance(msg, AIMessage):
+            content = extract_text_content(msg)
+            if content:
+                return content
 
     logger.error("[Graph] No AIMessage found in final state — returning fallback response.")
     return (

@@ -23,6 +23,7 @@ from langgraph.prebuilt import create_react_agent
 
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
+from app.agents.utils import extract_text_content
 from app.prompts.prompts import RECEPTION_PROMPT
 from app.tools.customer_tools import find_customer_tool, register_customer_tool
 
@@ -70,8 +71,9 @@ def reception_node(state: AgentState) -> dict[str, Any]:
     patient_id = state.get("patient_id")
 
     for msg in new_messages:
-        if hasattr(msg, "content") and isinstance(msg.content, str):
-            extracted = _extract_contact_id(msg.content)
+        content = extract_text_content(msg)
+        if content:
+            extracted = _extract_contact_id(content)
             if extracted and not contact_id:
                 contact_id = extracted
                 logger.info(f"[Reception] Extracted contact_id: {contact_id}")

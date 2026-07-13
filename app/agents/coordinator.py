@@ -18,6 +18,7 @@ from langchain_core.messages import SystemMessage
 
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
+from app.agents.utils import extract_text_content
 from app.prompts.prompts import COORDINATOR_PROMPT
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     messages = [SystemMessage(content=COORDINATOR_PROMPT)] + list(state["messages"])
 
     response = llm.invoke(messages)
-    raw_content = response.content.strip()
+    raw_content = extract_text_content(response).strip()
 
     logger.info(f"[Coordinator] LLM raw response: {raw_content!r}")
 

@@ -25,6 +25,7 @@ from langgraph.prebuilt import create_react_agent
 
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
+from app.agents.utils import extract_text_content
 from app.prompts.prompts import BOOKING_PROMPT
 from app.tools.appointment_tools import (
     cancel_appointment_tool,
@@ -92,8 +93,9 @@ def booking_node(state: AgentState) -> dict[str, Any]:
     # Attempt to extract active_reservation_id from tool outputs
     reservation_id = state.get("active_reservation_id")
     for msg in new_messages:
-        if hasattr(msg, "content") and isinstance(msg.content, str):
-            extracted = _extract_reservation_id(msg.content)
+        content = extract_text_content(msg)
+        if content:
+            extracted = _extract_reservation_id(content)
             if extracted and not reservation_id:
                 reservation_id = extracted
                 logger.info(f"[Booking] Extracted reservation_id: {reservation_id}")
@@ -103,6 +105,21 @@ def booking_node(state: AgentState) -> dict[str, Any]:
     updates: dict[str, Any] = {"messages": new_messages}
     if reservation_id:
         updates["active_reservation_id"] = reservation_id
+        # MOCK LOGIC for Milestone 6: If a reservation was just made, show payment buttons
+        # In later milestones, this will be handled by the backend state properly.
+        updates["ui_show_confirm_payment"] = True
+        updates["ui_show_expire_payment"] = True
+        updates["ui_payment_url"] = f"https://mock-payment-gateway.com/pay/{reservation_id}"
+
+        logger.info("[Booking] Set mock UI payment flags.")
+
+    # MOCK LOGIC: clear flags if we see a system message simulating payment confirm/expire
+    for msg in messages:
+        content = extract_text_content(msg)
+        if content.startswith("[System Event: Payment"):
+            updates["ui_show_confirm_payment"] = False
+            updates["ui_show_expire_payment"] = False
+            updates["ui_payment_url"] = None
 
     return updates
 

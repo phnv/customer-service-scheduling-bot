@@ -36,3 +36,12 @@ class AgentState(TypedDict):
     # Set by the Coordinator node — drives conditional routing
     # Values: "booking" | "faq" | "escalation"
     intent: Optional[str]
+
+    # Populated by the FAQ Agent's RAG tool to pass context to the UI
+    retrieved_docs: Optional[list[dict]]
+
+    # --- UI Demo Flags ---
+    ui_payment_url: Optional[str]
+    ui_show_confirm_payment: bool
+    ui_show_expire_payment: bool
+
