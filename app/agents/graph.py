@@ -32,7 +32,7 @@ from app.agents.faq_agent import faq_node
 from app.agents.reception_agent import reception_node
 from app.agents.state import AgentState
 from app.agents.utils import extract_text_content
-from app.prompts.prompts import ESCALATION_MESSAGE
+from app.prompts import ESCALATION_MESSAGE
 
 logger = logging.getLogger(__name__)
 
@@ -132,18 +132,9 @@ def run_agent(user_message: str, conversation_id: str | None = None) -> tuple[st
     # LangGraph config: thread_id enables MemorySaver to restore prior state
     config = {"configurable": {"thread_id": conversation_id}}
 
-    # Initial state for this invocation — messages accumulate via add_messages reducer
-    initial_state: AgentState = {
+    initial_state: dict[str, Any] = {
         "messages": [HumanMessage(content=user_message)],
         "conversation_id": conversation_id,
-        "contact_id": None,
-        "patient_id": None,
-        "active_reservation_id": None,
-        "intent": None,
-        "retrieved_docs": None,
-        "ui_payment_url": None,
-        "ui_show_confirm_payment": False,
-        "ui_show_expire_payment": False,
     }
 
     result = _graph.invoke(initial_state, config=config)

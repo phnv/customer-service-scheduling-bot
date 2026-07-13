@@ -9,10 +9,10 @@ contact_id is available in state.
 
 Tools available:
   - check_availability_tool: query available slots by specialty/date
-  - reserve_appointment_tool: create a reservation for a slot
+  - reserve_slot_tool: create a reservation for a slot
   - cancel_appointment_tool: cancel an existing reservation
   - reschedule_appointment_tool: move an appointment to a new slot
-  - register_lead_tool: record lead qualification data after interaction
+  - update_lead_tool: record lead qualification data after interaction
 """
 
 from __future__ import annotations
@@ -26,14 +26,19 @@ from langgraph.prebuilt import create_react_agent
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
 from app.agents.utils import extract_text_content
-from app.prompts.prompts import BOOKING_PROMPT
+from app.prompts import (
+    GLOBAL_PROMPT,
+    BOOKING_PROMPT,
+    get_prompt_variables,
+    render_prompt,
+)
 from app.tools.appointment_tools import (
     cancel_appointment_tool,
     check_availability_tool,
     reschedule_appointment_tool,
-    reserve_appointment_tool,
+    reserve_slot_tool,
 )
-from app.tools.qualification_tools import register_lead_tool
+from app.tools.qualification_tools import update_lead_tool
 
 logger = logging.getLogger(__name__)
 
@@ -45,16 +50,18 @@ def _get_booking_agent():
     """Returns the booking ReAct agent, building it on first call."""
     global _booking_react_agent
     if _booking_react_agent is None:
+        raw_prompt = GLOBAL_PROMPT + "\n\n" + BOOKING_PROMPT
+        final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _booking_react_agent = create_react_agent(
             model=get_llm(temperature=0.0),
             tools=[
                 check_availability_tool,
-                reserve_appointment_tool,
+                reserve_slot_tool,
                 cancel_appointment_tool,
                 reschedule_appointment_tool,
-                register_lead_tool,
+                update_lead_tool,
             ],
-            prompt=BOOKING_PROMPT,
+            prompt=final_prompt,
         )
     return _booking_react_agent
 
@@ -154,7 +161,7 @@ def _extract_reservation_id(text: str) -> str | None:
     """
     Attempt to extract a reservation_id from tool output text.
     """
-    match = re.search(r'"reservation_id"\s*:\s*"([^"]+)"', text)
+    match = re.search(r'[\'"]reservation_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
     if match:
         return match.group(1)
     return None

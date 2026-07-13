@@ -19,7 +19,12 @@ from langchain_core.messages import SystemMessage
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
 from app.agents.utils import extract_text_content
-from app.prompts.prompts import COORDINATOR_PROMPT
+from app.prompts import (
+    GLOBAL_PROMPT,
+    COORDINATOR_PROMPT,
+    get_prompt_variables,
+    render_prompt,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +41,9 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     llm = get_llm(temperature=0.0)
 
     # Build the prompt: system instruction + the full conversation history
-    messages = [SystemMessage(content=COORDINATOR_PROMPT)] + list(state["messages"])
+    raw_prompt = GLOBAL_PROMPT + "\n\n" + COORDINATOR_PROMPT
+    final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
+    messages = [SystemMessage(content=final_prompt)] + list(state["messages"])
 
     response = llm.invoke(messages)
     raw_content = extract_text_content(response).strip()

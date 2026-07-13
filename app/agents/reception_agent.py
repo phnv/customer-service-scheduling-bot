@@ -5,8 +5,8 @@ Runs as a ReAct agent using create_react_agent. It always executes before
 the Booking agent to ensure we have a valid contact_id and patient_id in state.
 
 Tools available:
-  - find_customer_tool: lookup contact by phone, document, or email
-  - register_customer_tool: create a new contact if not found
+  - find_contact_tool: lookup contact by phone, document, or email
+  - create_contact_tool: create a new contact if not found
 
 After completing its work, this node also attempts to extract and persist
 the contact_id into the shared AgentState for downstream agents.
@@ -24,8 +24,18 @@ from langgraph.prebuilt import create_react_agent
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
 from app.agents.utils import extract_text_content
-from app.prompts.prompts import RECEPTION_PROMPT
-from app.tools.customer_tools import find_customer_tool, register_customer_tool
+from app.prompts import (
+    GLOBAL_PROMPT,
+    RECEPTION_PROMPT,
+    get_prompt_variables,
+    render_prompt,
+)
+from app.tools.customer_tools import (
+    find_contact_tool,
+    create_contact_tool,
+    find_patient_tool,
+    create_patient_tool,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +47,17 @@ def _get_reception_agent():
     """Returns the reception ReAct agent, building it on first call."""
     global _reception_react_agent
     if _reception_react_agent is None:
+        raw_prompt = GLOBAL_PROMPT + "\n\n" + RECEPTION_PROMPT
+        final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _reception_react_agent = create_react_agent(
             model=get_llm(temperature=0.0),
-            tools=[find_customer_tool, register_customer_tool],
-            prompt=RECEPTION_PROMPT,
+            tools=[
+                find_contact_tool,
+                create_contact_tool,
+                find_patient_tool,
+                create_patient_tool,
+            ],
+            prompt=final_prompt,
         )
     return _reception_react_agent
 
@@ -73,10 +90,15 @@ def reception_node(state: AgentState) -> dict[str, Any]:
     for msg in new_messages:
         content = extract_text_content(msg)
         if content:
-            extracted = _extract_contact_id(content)
-            if extracted and not contact_id:
-                contact_id = extracted
+            extracted_contact = _extract_contact_id(content)
+            if extracted_contact and not contact_id:
+                contact_id = extracted_contact
                 logger.info(f"[Reception] Extracted contact_id: {contact_id}")
+
+            extracted_patient = _extract_patient_id(content)
+            if extracted_patient and not patient_id:
+                patient_id = extracted_patient
+                logger.info(f"[Reception] Extracted patient_id: {patient_id}")
 
     logger.info(
         f"[Reception] Done. contact_id={contact_id!r}, patient_id={patient_id!r}"
@@ -94,11 +116,17 @@ def reception_node(state: AgentState) -> dict[str, Any]:
 def _extract_contact_id(text: str) -> str | None:
     """
     Attempt to extract a contact_id from tool output text.
-
-    Tool outputs may contain a JSON snippet like {"contact_id": "abc-123"}.
-    This is a best-effort parse; the LLM itself tracks this in conversation context.
     """
-    match = re.search(r'"contact_id"\s*:\s*"([^"]+)"', text)
+    match = re.search(r'[\'"]contact_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
+    if match:
+        return match.group(1)
+    return None
+
+def _extract_patient_id(text: str) -> str | None:
+    """
+    Attempt to extract a patient_id from tool output text.
+    """
+    match = re.search(r'[\'"]patient_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
     if match:
         return match.group(1)
     return None

@@ -20,7 +20,12 @@ from langgraph.prebuilt import create_react_agent
 
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
-from app.prompts.prompts import FAQ_PROMPT
+from app.prompts import (
+    GLOBAL_PROMPT,
+    FAQ_PROMPT,
+    get_prompt_variables,
+    render_prompt,
+)
 from app.tools.faq_tools import search_faq_tool
 
 logger = logging.getLogger(__name__)
@@ -33,10 +38,12 @@ def _get_faq_agent():
     """Returns the FAQ ReAct agent, building it on first call."""
     global _faq_react_agent
     if _faq_react_agent is None:
+        raw_prompt = GLOBAL_PROMPT + "\n\n" + FAQ_PROMPT
+        final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _faq_react_agent = create_react_agent(
             model=get_llm(temperature=0.0),
             tools=[search_faq_tool],
-            prompt=FAQ_PROMPT,
+            prompt=final_prompt,
         )
     return _faq_react_agent
 
