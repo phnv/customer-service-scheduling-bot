@@ -10,6 +10,8 @@ adhere strictly to these architectural constraints and guidelines.
 ```
 Streamlit UI
     ↓
+ChatApplication (app/ui/application.py)
+    ↓
 app/agents/graph.py  (run_agent entry point)
     ↓
 Coordinator Node  →  Intent Classification & Routing
@@ -112,18 +114,31 @@ Never hardcode prompts inside agent files.
 
 ---
 
-## 7. Public API
+## 7. Public API & UI Decoupling
 
-The Streamlit UI calls exactly one function:
+The Streamlit UI **must never** interact directly with LangGraph or its internal state. 
+
+All interactions go through the Application layer (`app/ui/application.py`):
 
 ```python
-from app.agents.graph import run_agent
+from app.ui.application import ChatApplication
+from app.ui.view_models import ChatViewModel
 
-response: str = run_agent(
+# 1. Process a user message
+view_model: ChatViewModel = ChatApplication.run(
     user_message="I'd like to book an appointment",
     conversation_id="conv-abc123"
 )
+
+# 2. Process a simulated external event (e.g. Webhook)
+view_model: ChatViewModel = ChatApplication.handle_external_event(
+    event_name="Payment Confirmed",
+    payload={"status": "paid"},
+    conversation_id="conv-abc123"
+)
 ```
+
+The `ChatViewModel` translates the internal `AgentState` (including UI flags) into safe, decoupled properties that Streamlit can safely render.
 
 ---
 
