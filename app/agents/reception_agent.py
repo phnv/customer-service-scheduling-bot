@@ -35,6 +35,7 @@ from app.tools.customer_tools import (
     create_contact_tool,
     find_patient_tool,
     create_patient_tool,
+    select_patient_tool,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,7 @@ def _get_reception_agent():
                 create_contact_tool,
                 find_patient_tool,
                 create_patient_tool,
+                select_patient_tool,
             ],
             prompt=final_prompt,
         )
@@ -126,7 +128,7 @@ def _extract_patient_id(text: str) -> str | None:
     """
     Attempt to extract a patient_id from tool output text.
     """
-    match = re.search(r'[\'"]patient_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
+    match = re.search(r'[\'"]selected_patient_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
     if match:
         return match.group(1)
     return None

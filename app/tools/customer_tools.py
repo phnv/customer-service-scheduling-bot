@@ -64,3 +64,9 @@ def create_patient_tool(contact_id: str, full_name: str, relationship: str, birt
         result = service.create_patient(contact_id=contact_id, full_name=full_name, relationship=relationship, birthdate=parsed_date)
         logger.info(f"Tool 'create_patient_tool' output: {result}")
         return result
+
+@tool
+def select_patient_tool(patient_id: str) -> dict:
+    """Selects the patient for the upcoming appointment scheduling. MUST be called to lock in the patient."""
+    logger.info(f"Tool 'select_patient_tool' called with payload: patient_id={patient_id}")
+    return {"selected_patient_id": patient_id}

@@ -52,6 +52,17 @@ def escalation_node(state: AgentState) -> dict[str, Any]:
         "messages": [AIMessage(content=ESCALATION_MESSAGE)]
     }
 
+def route_after_reception(state: AgentState) -> str:
+    """
+    If Reception has identified both contact and patient, proceed to Booking.
+    Otherwise, wait for user input (END).
+    """
+    if state.get("contact_id") and state.get("patient_id"):
+        logger.info("[Graph] Both contact_id and patient_id set. Routing to 'booking'.")
+        return "booking"
+    logger.info("[Graph] Missing contact_id or patient_id. Waiting for user input (END).")
+    return END
+
 
 # ---------------------------------------------------------------------------
 # Graph Assembly
@@ -83,8 +94,15 @@ def _build_graph() -> Any:
         },
     )
 
-    # Reception always hands off to Booking
-    graph.add_edge("reception", "booking")
+    # Reception routes to Booking only when contact and patient are identified
+    graph.add_conditional_edges(
+        "reception",
+        route_after_reception,
+        {
+            "booking": "booking",
+            END: END,
+        },
+    )
 
     # Terminal edges
     graph.add_edge("booking", END)
