@@ -33,6 +33,9 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     """
     LangGraph node: classifies the user's latest message and sets state["intent"].
 
+    Injects the current active conversation mode into the prompt so the LLM
+    can make context-aware routing decisions (e.g., resume mid-booking flow).
+
     Returns:
         Partial state update — only sets `intent`. Messages are not modified here.
     """
@@ -40,9 +43,12 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
 
     llm = get_llm(temperature=0.0)
 
-    # Build the prompt: system instruction + the full conversation history
+    # Build prompt variables, injecting the active conversation mode context
+    prompt_vars = get_prompt_variables()
+    prompt_vars["ACTIVE_MODE_CONTEXT"] = _build_active_mode_context(state)
+
     raw_prompt = GLOBAL_PROMPT + "\n\n" + COORDINATOR_PROMPT
-    final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
+    final_prompt = render_prompt(raw_prompt, **prompt_vars)
     messages = [SystemMessage(content=final_prompt)] + list(state["messages"])
 
     response = llm.invoke(messages)
@@ -55,6 +61,27 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     logger.info(f"[Coordinator] Resolved intent: {intent!r}")
 
     return {"intent": intent}
+
+
+def _build_active_mode_context(state: AgentState) -> str:
+    """
+    Returns a human-readable string describing the current active conversation
+    mode so the coordinator LLM can make smarter routing decisions mid-flow.
+
+    Example output:
+        "The user is currently in an active 'booking' conversation. If the
+        user's message is a direct answer to a previous question in that flow,
+        prefer routing to 'booking' over switching intents."
+    """
+    active_intent = state.get("intent")
+    if not active_intent or active_intent not in {"booking", "faq"}:
+        return "There is no active conversation mode. Classify intent from scratch."
+
+    return (
+        f"The user is currently in an active '{active_intent}' conversation. "
+        f"If the user's message is a direct continuation or answer to a previous question "
+        f"in that flow, prefer routing to '{active_intent}' over switching intents."
+    )
 
 
 def _parse_intent(raw: str) -> str:

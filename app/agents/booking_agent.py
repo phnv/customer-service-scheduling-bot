@@ -34,6 +34,7 @@ from app.prompts import (
 )
 from app.tools.appointment_tools import (
     cancel_appointment_tool,
+    cancel_reservation_tool,
     check_availability_tool,
     reschedule_appointment_tool,
     reserve_slot_tool,
@@ -57,7 +58,8 @@ def _get_booking_agent():
             tools=[
                 check_availability_tool,
                 reserve_slot_tool,
-                cancel_appointment_tool,
+                cancel_reservation_tool,   # for pre-payment reservation cancellations
+                cancel_appointment_tool,   # for post-payment appointment cancellations
                 reschedule_appointment_tool,
                 update_lead_tool,
             ],
