@@ -1,4 +1,4 @@
-# Customer Service Scheduling Bot
+# Customer Service Scheduling Bot (IN PROGRESS)
 
 A multi-agent conversational customer service platform using a medical clinic as the demonstration domain.
 
