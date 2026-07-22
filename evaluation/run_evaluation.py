@@ -5,9 +5,9 @@ Loads the evaluation dataset, wraps run_agent() as the predict function,
 runs mlflow.genai.evaluate() with all registered scorers, and saves results.
 
 Usage:
-    uv run python scripts/run_evaluation.py               # Full evaluation
-    uv run python scripts/run_evaluation.py --dry-run      # 3 records only
-    uv run python scripts/run_evaluation.py --dataset NAME # Use a specific dataset
+    uv run python evaluation/run_evaluation.py               # Full evaluation
+    uv run python evaluation/run_evaluation.py --dry-run      # 3 records only
+    uv run python evaluation/run_evaluation.py --dataset NAME # Use a specific dataset
 """
 
 import argparse
@@ -33,7 +33,7 @@ from mlflow.genai.datasets import search_datasets
 # ---------------------------------------------------------------------------
 # MLflow Configuration
 # ---------------------------------------------------------------------------
-tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
 
 experiment_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "customer-service-bot")
@@ -109,7 +109,7 @@ def load_dataset(dataset_name: str):
     datasets = search_datasets(filter_string=f"name = '{dataset_name}'")
     if not datasets:
         print(f"ERROR: Dataset '{dataset_name}' not found.", file=sys.stderr)
-        print("Run 'uv run python scripts/create_dataset.py' first.", file=sys.stderr)
+        print("Run 'uv run python evaluation/create_dataset.py' first.", file=sys.stderr)
         sys.exit(1)
     return datasets[0]
 
@@ -127,7 +127,7 @@ def load_registered_scorers():
         scorers = list_scorers(experiment_id=experiment.experiment_id)
         if not scorers:
             print("WARNING: No registered scorers found.", file=sys.stderr)
-            print("Run 'uv run python scripts/register_scorers.py' first.", file=sys.stderr)
+            print("Run 'uv run python evaluation/register_scorers.py' first.", file=sys.stderr)
             return []
         print(f"   Loaded {len(scorers)} scorers: {[s.name for s in scorers]}")
         return scorers
@@ -157,9 +157,8 @@ def run_evaluation(dataset_name: str, dry_run: bool = False):
         print(f"   Records: {total_records}")
 
     # 2. Estimate runtime
-    records_to_run = len(df)
-    est_min = (records_to_run * 30) / 60  # ~30s per record with Gemini
-    est_max = (records_to_run * 60) / 60  # ~60s per record worst case
+    est_min = (total_records * 30) / 60  # ~30s per record with Gemini
+    est_max = (total_records * 60) / 60  # ~60s per record worst case
     print(f"   ⏱  Estimated time: {est_min:.0f}–{est_max:.0f} minutes")
 
     # 3. Build predict function
@@ -176,7 +175,7 @@ def run_evaluation(dataset_name: str, dry_run: bool = False):
     # 4. Run evaluation
     run_name = f"prompt-eval-{'dry-run' if dry_run else 'full'}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     print(f"\n🚀 Starting evaluation run: {run_name}")
-    print(f"   Records: {records_to_run}")
+    print(f"   Records: {total_records}")
 
     start_time = time.time()
 
@@ -185,7 +184,7 @@ def run_evaluation(dataset_name: str, dry_run: bool = False):
         mlflow.log_params({
             "dataset": dataset_name,
             "dry_run": str(dry_run),
-            "records": records_to_run,
+            "records": total_records,
             "predict_fn": "run_agent",
             "scorers": str([s.name for s in scorers]),
         })
@@ -201,10 +200,11 @@ def run_evaluation(dataset_name: str, dry_run: bool = False):
 
         # Log timing
         mlflow.log_metric("evaluation_time_seconds", elapsed)
-        mlflow.log_metric("seconds_per_record", elapsed / max(records_to_run, 1))
+        mlflow.log_metric("seconds_per_record", elapsed / max(total_records, 1))
 
     # 5. Save results
-    output_file = "evaluation_results.csv"
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    output_file = f"evaluation/results/evaluation_results_{timestamp}.csv"
     if results and hasattr(results, "tables"):
         for table_name, table_df in results.tables.items():
             table_df.to_csv(output_file, index=False)
@@ -219,7 +219,7 @@ def run_evaluation(dataset_name: str, dry_run: bool = False):
     print(f"\n{'=' * 60}")
     print(f"  ✅ Evaluation complete!")
     print(f"  Run name: {run_name}")
-    print(f"  Time: {elapsed:.1f}s ({elapsed/max(records_to_run,1):.1f}s/record)")
+    print(f"  Time: {elapsed:.1f}s ({elapsed/max(total_records,1):.1f}s/record)")
     print(f"  Results: {output_file}")
     print(f"{'=' * 60}")
 

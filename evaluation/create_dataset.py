@@ -5,7 +5,7 @@ This script creates a multi-turn evaluation dataset covering all 4 active agents
 Coordinator, Reception, Booking, and FAQ.
 
 Usage:
-    uv run python scripts/create_dataset.py
+    uv run python evaluation/create_dataset.py
 """
 
 import os
@@ -21,7 +21,7 @@ from mlflow.genai.datasets import create_dataset
 # ---------------------------------------------------------------------------
 # MLflow Configuration
 # ---------------------------------------------------------------------------
-tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
 
 experiment_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "customer-service-bot")
@@ -142,6 +142,7 @@ RECORDS = [
             ],
             "agent_under_test": "reception",
         },
+        # DB Error - no patient called emma . add to db link to contact phone 555-1234
         "expected_response": "Calls select_patient_tool with Emma's patient_id. Should confirm the patient selection and indicate readiness to proceed to scheduling.",
     },
     {

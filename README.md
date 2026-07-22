@@ -10,7 +10,8 @@ It demonstrates:
 - Multi-agent orchestration
 - Agent routing
 - Tool calling
-- Semantic RAG (Retrieval-Augmented Generation) *(Upcoming)*
+- Semantic RAG (Retrieval-Augmented Generation)
+- Prompt Evaluation (LLM-as-a-Judge via MLflow)
 - Clean software architecture
 - UI decoupling via ViewModels
 
@@ -34,6 +35,7 @@ The architecture is strictly layered:
 - **Database:** SQLite (managed via SQLModel)
 - **Vector Store:** ChromaDB with `sentence-transformers`
 - **Frontend:** Streamlit
+- **Evaluation:** MLflow (LLM-as-a-judge)
 
 ## Getting Started
 
@@ -70,3 +72,12 @@ Launch the Streamlit interface:
 PYTHONPATH=. uv run python scripts/run_ui.py
 ```
 This will open the chat interface, complete with demo controls for external events (like payments) and a live Database Inspector.
+
+### 5. Prompt Evaluation
+
+To run the LLM-as-a-judge evaluation pipeline against the multi-turn dataset using MLflow:
+
+```bash
+uv run python evaluation/run_evaluation.py
+```
+This will run the dataset and log the results locally. You can analyze the results in `notebooks/prompt_evaluation.ipynb`.

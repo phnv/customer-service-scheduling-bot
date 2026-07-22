@@ -9,7 +9,7 @@ Registers 5 scorers into the MLflow experiment:
   5. Hallucination Check  — LLM-as-judge via make_judge()
 
 Usage:
-    uv run python scripts/register_scorers.py
+    uv run python evaluation/register_scorers.py
 """
 
 import os
@@ -26,7 +26,7 @@ from mlflow.genai.judges import make_judge
 # ---------------------------------------------------------------------------
 # MLflow Configuration
 # ---------------------------------------------------------------------------
-tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
 
 experiment_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "customer-service-bot")
