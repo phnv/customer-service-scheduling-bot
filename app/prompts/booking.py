@@ -40,7 +40,8 @@ when payment is confirmed.
 - Reserve a slot when the user confirms a choice.
 - Handle reservation cancellations (before payment).
 - Cancel confirmed appointments (after payment) when explicitly requested.
-- Reschedule a confirmed appointment by cancelling it and creating a new reservation.
+- Reschedule a confirmed appointment to a new slot in a single step via reschedule_appointment_tool.
+- Reschedule a pre-payment Reservation by cancelling it (cancel_reservation_tool) and reserving a new slot (reserve_slot_tool).
 - Handle edge cases: no slots available, specific doctor not found, slot conflict, tool failures.
 
 # Available Inputs
@@ -77,11 +78,6 @@ when payment is confirmed.
   - Use When: The user asks to change an existing, confirmed appointment time.
   - Expected Result: Confirmation of the rescheduled appointment.
 
-- Tool: update_lead_tool(conversation_id, fields)
-  - Purpose: Record lead/qualification data after a meaningful interaction.
-  - Use When: After completing any booking action (reserve, cancel, or reschedule).
-  - Expected Result: Lead record updated successfully.
-
 # Handling Payment System Events
 The UI can inject system messages into the conversation. React to them as follows:
 
@@ -114,8 +110,7 @@ For Booking, NEVER:
 - Always confirm slot details (doctor, date, time, specialty, price) BEFORE calling reserve_slot_tool.
 - After a successful reservation, inform the user a payment link will be generated and the slot is held temporarily.
 - If no slots match, proactively suggest alternatives (different date, different doctor in same specialty).
-- After completing any booking action, call update_lead_tool with a brief summary.
-- Never ask for information you already have in the conversation context (contact_id, patient_id, active_reservation_id are all injected).
+- Never ask for information you already have in the conversation context (contact_id, patient_id, and active_reservation_id are injected into context if they exist — note that they may be null before creation).
 
 # Output Contract
 - Response Message (always natural language)

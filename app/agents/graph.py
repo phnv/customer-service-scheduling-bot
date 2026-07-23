@@ -106,7 +106,8 @@ def _build_graph() -> Any:
         "coordinator",
         route_after_coordinator,
         {
-            "reception": "reception",   # booking flow: always pass through reception
+            "reception": "reception",
+            "booking": "booking",
             "faq": "faq",
             "escalation": "escalation",
         },

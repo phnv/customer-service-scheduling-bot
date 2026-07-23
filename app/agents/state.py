@@ -33,9 +33,25 @@ class AgentState(TypedDict):
     # Set when an active reservation has been created in the current conversation
     active_reservation_id: Optional[str]
 
-    # Set by the Coordinator node — drives conditional routing
+    # Set by the Coordinator node on EVERY turn — drives conditional routing.
     # Values: "booking" | "faq" | "escalation"
     intent: Optional[str]
+
+    # Set by the Coordinator node — the durable multi-turn task the user is
+    # currently engaged in (as opposed to `intent`, which is the routing
+    # decision for THIS turn only). Persists across single-turn detours (e.g.
+    # a booking flow stays "booking" even during a one-off FAQ question) and
+    # is only changed when the Coordinator judges the user has switched to,
+    # resumed, or abandoned a durable task.
+    # Values: "booking" | "faq" | None
+    flow: Optional[str]
+
+    # Set by the Coordinator node — a single-paragraph summary of the
+    # conversation so far. Rewritten (not appended) only when the Coordinator
+    # judges something meaningful happened (identity confirmed, key decision,
+    # topic change, booking outcome, escalation-worthy frustration, etc.).
+    # Left unchanged on quiet turns — never wiped by omission.
+    conversation_summary: Optional[str]
 
     # Populated by the FAQ Agent's RAG tool to pass context to the UI
     retrieved_docs: Optional[list[dict]]

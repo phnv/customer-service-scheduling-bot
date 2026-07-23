@@ -4,11 +4,8 @@ FAQ Agent — General Knowledge Questions.
 Runs as a ReAct agent using create_react_agent. Answers general questions
 about the clinic by querying the knowledge base via search_faq_tool.
 
-Note: In Milestone 5, search_faq_tool is a keyword-matching stub.
-      A full semantic RAG pipeline will replace it in Milestone 6.
-
 Tools available:
-  - search_faq_tool: keyword-matched stub knowledge base lookup
+  - search_faq_tool: query the clinic knowledge base via semantic search
 """
 
 from __future__ import annotations
@@ -16,6 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from langchain_core.messages import SystemMessage
 from langgraph.prebuilt import create_react_agent
 
 from app.agents.llm_factory import get_llm
@@ -57,8 +55,13 @@ def faq_node(state: AgentState) -> dict[str, Any]:
     """
     logger.info("[FAQ] Starting knowledge base lookup...")
 
+    messages = list(state["messages"])
+    context_note = _build_context_note(state)
+    if context_note:
+        messages = [SystemMessage(content=context_note)] + messages
+
     result = _get_faq_agent().invoke(
-        {"messages": list(state["messages"])},
+        {"messages": messages},
         config={"configurable": {"thread_id": state["conversation_id"]}},
     )
 
@@ -66,3 +69,16 @@ def faq_node(state: AgentState) -> dict[str, Any]:
     logger.info("[FAQ] Knowledge base response complete.")
 
     return {"messages": new_messages}
+
+
+def _build_context_note(state: AgentState) -> str | None:
+    """
+    Builds a system-level context injection for the FAQ agent.
+
+    Currently only surfaces the rolling conversation_summary maintained by the
+    Coordinator, so the FAQ agent has awareness of the broader conversation
+    (e.g., an in-progress booking) even though it has no scheduling tools.
+    """
+    if state.get("conversation_summary"):
+        return f"Conversation Summary: {state['conversation_summary']}"
+    return None

@@ -4,9 +4,6 @@ Reception Agent — Contact Identification & Patient Selection.
 Runs as a ReAct agent using create_react_agent. It always executes before
 the Booking agent to ensure we have a valid contact_id and patient_id in state.
 
-Tools available:
-  - find_contact_tool: lookup contact by phone, document, or email
-  - create_contact_tool: create a new contact if not found
 
 After completing its work, this node also attempts to extract and persist
 the contact_id into the shared AgentState for downstream agents.
@@ -33,6 +30,7 @@ from app.prompts import (
 from app.tools.customer_tools import (
     find_contact_tool,
     create_contact_tool,
+    update_contact_tool,
     find_patient_tool,
     create_patient_tool,
     select_patient_tool,
@@ -55,6 +53,7 @@ def _get_reception_agent():
             tools=[
                 find_contact_tool,
                 create_contact_tool,
+                update_contact_tool,
                 find_patient_tool,
                 create_patient_tool,
                 select_patient_tool,
@@ -77,9 +76,14 @@ def reception_node(state: AgentState) -> dict[str, Any]:
     """
     logger.info("[Reception] Starting contact identification...")
 
+    messages = list(state["messages"])
+    context_note = _build_context_note(state)
+    if context_note:
+        messages = [SystemMessage(content=context_note)] + messages
+
     # Invoke the ReAct agent with current message history
     result = _get_reception_agent().invoke(
-        {"messages": list(state["messages"])},
+        {"messages": messages},
         config={"configurable": {"thread_id": state["conversation_id"]}},
     )
 
@@ -113,6 +117,19 @@ def reception_node(state: AgentState) -> dict[str, Any]:
         updates["patient_id"] = patient_id
 
     return updates
+
+
+def _build_context_note(state: AgentState) -> str | None:
+    """
+    Builds a system-level context injection for the reception agent.
+
+    Currently only surfaces the rolling conversation_summary maintained by the
+    Coordinator (booking/patient identity injection is not needed here since
+    Reception is responsible for establishing those IDs itself).
+    """
+    if state.get("conversation_summary"):
+        return f"Conversation Summary: {state['conversation_summary']}"
+    return None
 
 
 def _extract_contact_id(text: str) -> str | None:

@@ -7,12 +7,7 @@ checking availability, reserving, cancelling, and rescheduling appointments.
 This node always runs AFTER the Reception node, which guarantees that
 contact_id is available in state.
 
-Tools available:
-  - check_availability_tool: query available slots by specialty/date
-  - reserve_slot_tool: create a reservation for a slot
-  - cancel_appointment_tool: cancel an existing reservation
-  - reschedule_appointment_tool: move an appointment to a new slot
-  - update_lead_tool: record lead qualification data after interaction
+
 """
 
 from __future__ import annotations
@@ -39,7 +34,6 @@ from app.tools.appointment_tools import (
     reschedule_appointment_tool,
     reserve_slot_tool,
 )
-from app.tools.qualification_tools import update_lead_tool
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +55,6 @@ def _get_booking_agent():
                 cancel_reservation_tool,   # for pre-payment reservation cancellations
                 cancel_appointment_tool,   # for post-payment appointment cancellations
                 reschedule_appointment_tool,
-                update_lead_tool,
             ],
             prompt=final_prompt,
         )
@@ -149,6 +142,8 @@ def _build_context_note(state: AgentState) -> str | None:
         parts.append(f"Conversation ID: {state['conversation_id']}")
     if state.get("active_reservation_id"):
         parts.append(f"Active Reservation ID: {state['active_reservation_id']}")
+    if state.get("conversation_summary"):
+        parts.append(f"Conversation Summary: {state['conversation_summary']}")
 
     if not parts:
         return None

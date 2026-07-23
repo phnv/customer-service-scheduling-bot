@@ -3,6 +3,8 @@
 Welcome! If you are an AI coding agent or LLM assisting with this project,
 adhere strictly to these architectural constraints and guidelines.
 
+Before modifying prompts, business rules or datasets, follow the Alignment Workflow described in `docs/change_workflow.md`.
+
 ---
 
 ## 1. Layered Architecture
@@ -44,7 +46,8 @@ START
   ▼
 [coordinator_node]
   │ sets state["intent"]
-  ├─ "booking" ──→ [reception_node] ──→ [booking_node] ──→ END
+  ├─ "booking" (missing IDs) ──→ [reception_node] ──→ [booking_node] ──→ END
+  ├─ "booking" (has IDs) ──────→ [booking_node] ──→ END
   ├─ "faq" ──────────────────────────→ [faq_node] ────────→ END
   └─ "escalation" ───────────────────→ [escalation_node] ─→ END
 ```
@@ -54,9 +57,9 @@ START
 | Node | Module | Pattern | Tools |
 |---|---|---|---|
 | `coordinator` | `app/agents/coordinator.py` | LLM structured-output | none |
-| `reception` | `app/agents/reception_agent.py` | ReAct (`create_react_agent`) | find_customer, register_customer |
-| `booking` | `app/agents/booking_agent.py` | ReAct (`create_react_agent`) | check_availability, reserve, cancel, reschedule, register_lead |
-| `faq` | `app/agents/faq_agent.py` | ReAct (`create_react_agent`) | search_faq (stub → RAG in M6) |
+| `reception` | `app/agents/reception_agent.py` | ReAct (`create_react_agent`) | find_contact, create_contact, update_contact, find_patient, create_patient, select_patient |
+| `booking` | `app/agents/booking_agent.py` | ReAct (`create_react_agent`) | check_availability, reserve_slot, cancel_reservation, cancel_appointment, reschedule_appointment |
+| `faq` | `app/agents/faq_agent.py` | ReAct (`create_react_agent`) | search_faq (RAG-backed via ChromaDB) |
 | `escalation` | `app/agents/graph.py` | Static gateway | none |
 
 ---
@@ -70,7 +73,15 @@ class AgentState(TypedDict):
     contact_id: Optional[str]      # set by Reception after identifying contact
     patient_id: Optional[str]      # set after patient selection
     active_reservation_id: Optional[str]  # set after successful reservation
-    intent: Optional[str]          # set by Coordinator: "booking"|"faq"|"escalation"
+    intent: Optional[str]          # set by Coordinator every turn: "booking"|"faq"|"escalation"
+    flow: Optional[str]            # set by Coordinator: durable task "booking"|"faq"|None,
+                                    # persists across single-turn detours (unlike intent)
+    conversation_summary: Optional[str]  # set by Coordinator: rolling one-paragraph summary,
+                                          # rewritten only on meaningful change
+    retrieved_docs: Optional[list[dict]]  # set by FAQ agent's RAG tool
+    ui_payment_url: Optional[str]
+    ui_show_confirm_payment: bool
+    ui_show_expire_payment: bool
 ```
 
 ---

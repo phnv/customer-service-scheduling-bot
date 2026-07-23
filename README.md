@@ -21,7 +21,7 @@ The application is completely self-contained. All external service integrations 
 
 The system uses **LangGraph** to coordinate between several specialized agents under a Supervisor pattern:
 - **Coordinator Node:** Classifies user intent and routes the conversation.
-- **Reception Agent:** Always runs before booking to identify or register the contact.
+- **Reception Agent:** Runs before booking to identify or register the contact (bypassed once identity is established).
 - **Booking Agent:** Uses tools to manage appointments and doctor availability.
 - **FAQ Agent:** Uses RAG to answer questions based on clinic documentation.
 - **Escalation Node:** Handles unsupported requests and human handoff.

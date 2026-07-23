@@ -4,6 +4,25 @@ All notable changes to the prompts, tool routing, and agent decision logic are d
 
 ---
 
+## [2.1.0] - 2026-07-22
+
+### Added
+* **Durable Flow Tracking (Coordinator)**: Updated output JSON schema (`intent`, `flow`, `conversation_summary`) in `coordinator.py` to distinguish per-turn routing (`intent`) from multi-turn task context (`flow`), allowing single-turn FAQ detours without abandoning active flows.
+* **Conversation Summary Maintenance (Coordinator)**: Added instructions and guidelines in `coordinator.py` for generating and maintaining a rolling third-person conversation summary on key milestone events.
+* **Contact Details Update Support (Reception)**: Added `update_contact_tool` specification, decision rules, and few-shot example in `reception.py` for correcting stored contact information (phone, email, name, birthdate).
+* **Explicit Tool Query Parameter (FAQ)**: Documented parameter `query` for `search_faq_tool` in `faq.py`.
+* **Pre-Payment Rescheduling (Booking)**: Added explicit instructions to `booking.py` on how to reschedule an active reservation before payment by cancelling and re-reserving.
+
+### Changed
+* **Single-Step Rescheduling (Booking)**: Updated `booking.py` prompt instructions to handle rescheduling directly via `reschedule_appointment_tool` in a single step.
+* **Direct Booking Routing (Coordinator)**: Updated LangGraph routing logic in `coordinator.py` to bypass the Reception agent entirely and route directly to Booking when the user's `contact_id` and `patient_id` are already established in state.
+* **Prompt Cleanups**: Removed language implying Reception controls routing in `reception.py`. Clarified ID injection nullability in `booking.py`.
+
+### Removed
+* **Lead Tracking Tool (Booking)**: Removed `update_lead_tool` tool definition and post-booking update instructions from `booking.py`.
+
+---
+
 ## [2.0.0] - 2026-07-16
 
 ### Added

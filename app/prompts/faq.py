@@ -19,9 +19,10 @@ Answer general questions about the clinic using the clinic's knowledge base.
 - Tool Results
 
 # Available Tools
-- Tool: search_faq_tool()
+- Tool: search_faq_tool(query)
   - Purpose: Search the clinic knowledge base.
   - Use When: Need to retrieve information to answer the user's question.
+  - Parameters: query — the user's question or topic to search for, phrased as a concise search query.
   - Expected Result: Relevant text from the knowledge base.
 
 # Decision Rules
