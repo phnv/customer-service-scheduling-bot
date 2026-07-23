@@ -1,5 +1,5 @@
 patient_id,contact_id,full_name,birthdate,relationship
-1,1,Patient 1,1990-01-01,self
+1,1,Lucas Doe,1990-01-01,self
 2,2,Patient 2,1990-01-01,self
 3,3,Patient 3,1990-01-01,self
 4,4,Patient 4,1990-01-01,self
@@ -24,7 +24,7 @@ patient_id,contact_id,full_name,birthdate,relationship
 23,23,Patient 23,1990-01-01,self
 24,24,Patient 24,1990-01-01,self
 25,25,Patient 25,1990-01-01,self
-26,1,Child 1,2018-06-01,child
+26,1,Emma Doe,2018-06-01,child
 27,2,Child 2,2018-06-01,child
 28,3,Child 3,2018-06-01,child
 29,4,Child 4,2018-06-01,child

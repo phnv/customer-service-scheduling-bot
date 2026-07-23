@@ -1,5 +1,5 @@
 contact_id,full_name,email,phone,document,birthdate
-1,Contact 1,contact1@mail.com,+155500001,DOC001,1981-02-15
+1,John Doe,john@demo.com,+15550001234,DOC001,1981-02-15
 2,Contact 2,contact2@mail.com,+155500002,DOC002,1982-03-15
 3,Contact 3,contact3@mail.com,+155500003,DOC003,1983-04-15
 4,Contact 4,contact4@mail.com,+155500004,DOC004,1984-05-15

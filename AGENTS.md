@@ -57,9 +57,9 @@ START
 | Node | Module | Pattern | Tools |
 |---|---|---|---|
 | `coordinator` | `app/agents/coordinator.py` | LLM structured-output | none |
-| `reception` | `app/agents/reception_agent.py` | ReAct (`create_react_agent`) | find_contact, create_contact, update_contact, find_patient, create_patient, select_patient |
+| `reception` | `app/agents/reception_agent.py` | ReAct (`create_react_agent`) | find_contact, create_contact, find_patient, create_patient, select_patient |
 | `booking` | `app/agents/booking_agent.py` | ReAct (`create_react_agent`) | check_availability, reserve_slot, cancel_reservation, cancel_appointment, reschedule_appointment |
-| `faq` | `app/agents/faq_agent.py` | ReAct (`create_react_agent`) | search_faq (RAG-backed via ChromaDB) |
+| `faq` | `app/agents/faq_agent.py` | ReAct (`create_react_agent`) | search_faq (RAG via ChromaDB), search_services (live services catalogue) |
 | `escalation` | `app/agents/graph.py` | Static gateway | none |
 
 ---
@@ -113,15 +113,20 @@ Factory: `app/agents/llm_factory.get_llm(temperature=0.0)`
 
 ## 6. Prompts
 
-All system prompts live in `app/prompts/prompts.py` as named string constants:
+All system prompts live in `app/prompts/` as individual files per agent:
 
-- `COORDINATOR_PROMPT`
-- `RECEPTION_PROMPT`
-- `BOOKING_PROMPT`
-- `FAQ_PROMPT`
-- `ESCALATION_MESSAGE`
+- `global_prompt.py` — `GLOBAL_PROMPT` (identity, persona, general rules, tool policy, domain boundaries)
+- `coordinator.py` — `COORDINATOR_PROMPT`
+- `reception.py` — `RECEPTION_PROMPT`
+- `booking.py` — `BOOKING_PROMPT`
+- `faq.py` — `FAQ_PROMPT`
+- `escalation.py` — `ESCALATION_MESSAGE`
+- `config.py` — `get_prompt_variables()` returning `ORGANIZATION_NAME` and `TODAY`
+- `utils.py` — `render_prompt()` for `{{VARIABLE}}` interpolation
 
-Never hardcode prompts inside agent files.
+Never hardcode prompts inside agent files. Never reference team names or agent names in user-facing prompt text — all agents present as a single unified assistant (see Unified Persona in `agent-architecture.md`).
+
+> **M12:** `BOOKING_TEAM_NAME` has been removed from `config.py`. Prompts must not direct users to a named team. `update_contact_tool` has been removed from the Reception agent's tool bindings.
 
 ---
 

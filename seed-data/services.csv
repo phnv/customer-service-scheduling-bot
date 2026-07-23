@@ -3,8 +3,8 @@ service_id,doctor_id,specialty,service_type,service_mode,price,is_active
 2,1,Psychology,return,online,84,1
 3,2,Pediatrics,initial,in_person,140,1
 4,2,Pediatrics,return,online,98,1
-5,3,Gastroenterology,initial,in_person,180,1
-6,3,Gastroenterology,return,online,126,1
+5,3,Cardiology,initial,in_person,180,1
+6,3,Cardiology,return,online,126,1
 7,4,Endocrinology,initial,in_person,170,1
 8,4,Endocrinology,return,online,119,1
 9,5,Family Medicine,initial,in_person,100,1
