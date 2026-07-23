@@ -4,7 +4,28 @@ All notable changes to the prompts, tool routing, and agent decision logic are d
 
 ---
 
+## [3.0.0] - 2026-07-23 — Milestone 12: Prompt Evaluation #1
+
+### Added
+* **Unified Persona Rule (Global)**: Added `# Persona` section to `global_prompt.py` enforcing that all non-escalation agents present as a single unified assistant. Agents must never reference internal agent names, team names, or imply a handoff. The only legitimate handoff is human escalation.
+* **Proactive Contact Identification (Reception)**: Added Responsibility 0 to `reception.py` (v3.0.0) requiring Reception to greet the user and ask for their name and identifier (phone/email/document) on the very first turn of every conversation, before any intent is expressed.
+* **Escalation on Contact Correction (Reception)**: Added explicit rule and few-shot example to `reception.py`: if the user reports that any stored contact field is incorrect, Reception must immediately route to human escalation. The agent must not attempt to update the record.
+* **Pricing Tool for FAQ (FAQ)**: Added `search_services_tool(specialty, service_type, service_mode)` to `faq.py` (v2.0.0) for live pricing queries against the services catalogue. Decision rules now route by question type: pricing → `search_services_tool`, all other clinic questions → `search_faq_tool`.
+* **Proactive Booking Resume (FAQ)**: Added rule to `faq.py`: after answering a pricing question mid-booking flow, the agent proactively offers to resume the booking.
+
+### Changed
+* **Reception v3.0.0**: Full rewrite of `reception.py`. Version bumped from 2.0.0 → 3.0.0.
+* **FAQ v2.0.0**: Full rewrite of `faq.py`. Version bumped from 1.0.0 → 2.0.0.
+* **Escalation message** (`escalation.py`): Message tightened to be trigger-agnostic, covering both frustration-based and data-correction-based escalations.
+
+### Removed
+* **`update_contact_tool` (Reception)**: Removed from `reception.py` Responsibilities, Available Tools list, and few-shot examples. Contact data correction is now exclusively an escalation trigger. The underlying service method is preserved in `app/services/` for programmatic use but must not be bound to any agent.
+* **`BOOKING_TEAM_NAME` (Config)**: Removed from `config.py` entirely. All prompt references to a named scheduling team have been replaced with direct handling or unified-persona language. The variable no longer exists and must not be reintroduced.
+
+---
+
 ## [2.1.0] - 2026-07-22
+
 
 ### Added
 * **Durable Flow Tracking (Coordinator)**: Updated output JSON schema (`intent`, `flow`, `conversation_summary`) in `coordinator.py` to distinguish per-turn routing (`intent`) from multi-turn task context (`flow`), allowing single-turn FAQ detours without abandoning active flows.
