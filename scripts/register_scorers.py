@@ -32,7 +32,7 @@ mlflow.set_tracking_uri(tracking_uri)
 experiment_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "customer-service-bot")
 mlflow.set_experiment(experiment_name)
 
-# Judge model — uses Gemini since it's already configured in the project
+# Judge model — uses OpenAI for evaluation while the system uses Gemini
 JUDGE_MODEL = "openai:/gpt-4o-mini"
 
 
@@ -198,8 +198,13 @@ Return "yes" if the response is grounded (no hallucinations), "no" if it contain
         description="Evaluates whether the agent met the specific expectations defined for the test case.",
         instructions="""You are evaluating whether an AI customer service agent met the expectations for a test case.
 
-Given the agent's response {{ outputs }} and the expected behavior in {{ expectations }}, determine if the agent's behavior matched the expectations.
+The agent's response:
+{{ outputs }}
 
+Expected behavior:
+{{ expectations }}
+
+Determine if the agent's response fully satisfies the expected behavior described above.
 Return "yes" if the agent met all expectations, "no" if it failed to meet the expectations.""",
         feedback_value_type=Literal["yes", "no"],
     )

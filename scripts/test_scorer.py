@@ -1,13 +1,17 @@
+import os
+# Load dotenv to get all config values from .env
+from dotenv import load_dotenv
+load_dotenv()
+
+# Prevent MLflow from trying to fetch model catalog updates from GitHub, which causes connection timeouts
+os.environ.setdefault("MLFLOW_MODEL_CATALOG_URI", "")
+
 import mlflow
 from mlflow.genai.judges import make_judge
 from typing import Literal
 
 mlflow.set_tracking_uri("sqlite:///evaluation/mlflow.db")
 mlflow.set_experiment("customer-service-bot")
-
-import os
-os.environ["OPENAI_API_KEY"] = os.environ.get("GEMINI_API_KEY")
-os.environ["OPENAI_API_BASE"] = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 import mlflow.genai.judges.adapters.utils
 original_is_response_format_error = mlflow.genai.judges.adapters.utils.is_response_format_error
@@ -18,7 +22,7 @@ mlflow.genai.judges.adapters.utils.is_response_format_error = new_is_response_fo
 # Create the simplest trace scorer
 judge = make_judge(
     name="TestTraceJudge",
-    model="gemini:/gemini-2.5-flash",
+    model="openai:/gpt-4o-mini",
     description="Test",
     instructions="Given {{ trace }}, return 'yes'.",
     feedback_value_type=Literal["yes", "no"]

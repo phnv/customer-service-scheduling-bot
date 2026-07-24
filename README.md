@@ -31,11 +31,12 @@ The architecture is strictly layered:
 
 ## Tech Stack
 - **Backend Framework:** LangGraph (Python)
-- **LLM Provider:** Swappable (.env driven): Google Gemini (default), OpenAI, Anthropic
+- **LLM Provider (Chatbot):** Google Gemini (`gemini-2.5-flash`) — used by all agents
+- **LLM Provider (Evaluation Judge):** OpenAI (`gpt-4o-mini`) — used exclusively by MLflow LLM-as-a-Judge scorers
 - **Database:** SQLite (managed via SQLModel)
 - **Vector Store:** ChromaDB with `sentence-transformers`
 - **Frontend:** Streamlit
-- **Evaluation:** MLflow (LLM-as-a-judge)
+- **Evaluation:** MLflow (LLM-as-a-Judge via OpenAI)
 
 ## Getting Started
 
@@ -75,9 +76,26 @@ This will open the chat interface, complete with demo controls for external even
 
 ### 5. Prompt Evaluation
 
-To run the LLM-as-a-judge evaluation pipeline against the multi-turn dataset using MLflow:
+The evaluation pipeline uses **MLflow** with 6 LLM-as-a-Judge scorers backed by OpenAI `gpt-4o-mini`. The chatbot runs on Gemini; these are two independent providers — no proxying between them.
+
+> **⚠️ IMPORTANT:** You must have both `GEMINI_API_KEY` and `OPENAI_API_KEY` set in your `.env` to run evaluations.
+
+Before running for the first time, register the scorers:
 
 ```bash
-uv run python evaluation/run_evaluation.py
+uv run python scripts/register_scorers.py
 ```
-This will run the dataset and log the results locally. You can analyze the results in `notebooks/prompt_evaluation.ipynb`.
+
+Then run the evaluation against the 5-record sanity-check dataset (fast dry run):
+
+```bash
+uv run python scripts/run_evaluation.py
+```
+
+Or against the full 50-record dataset:
+
+```bash
+uv run python scripts/run_evaluation.py --dataset prompt-eval-v1
+```
+
+Results are logged to the MLflow experiment and saved to `evaluation_results.csv`. See [`docs/Milestone 13 - Whole MLFlow Implementation.md`](docs/Milestone%2013%20-%20Whole%20MLFlow%20Implementation.md) and [`docs/Milestone 14 - Evaluation Rate Limit Fix.md`](docs/Milestone%2014%20-%20Evaluation%20Rate%20Limit%20Fix.md) for full implementation details.

@@ -15,6 +15,13 @@ import argparse
 import os
 import sys
 
+# Load dotenv to get all config values from .env
+from dotenv import load_dotenv
+load_dotenv()
+
+# Prevent MLflow from trying to fetch model catalog updates from GitHub, which causes connection timeouts
+os.environ.setdefault("MLFLOW_MODEL_CATALOG_URI", "")
+
 # Add project root to sys.path so we can import from `app`
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

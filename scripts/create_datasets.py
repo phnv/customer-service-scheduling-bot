@@ -1,12 +1,32 @@
+"""
+Create MLflow evaluation datasets for prompt evaluation.
+
+Usage:
+    uv run python scripts/create_datasets.py             # create / merge (safe)
+    uv run python scripts/create_datasets.py --purge     # delete & re-seed (use to fix bad data)
+
+Versioning:
+    Dataset records are tagged with {"dataset_version": DATASET_VERSION}.
+    Bump DATASET_VERSION when introducing breaking schema changes. The dataset
+    NAME is intentionally kept stable so run_evaluation.py never needs updating.
+"""
+
+import argparse
 import os
 import sys
-import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 
 import mlflow
 from mlflow.genai.datasets import create_dataset, get_dataset
+
+# ---------------------------------------------------------------------------
+# Dataset versioning
+# ---------------------------------------------------------------------------
+# Bump this constant when the record schema changes in a breaking way.
+# The version is stored as a tag on every record (not encoded in the dataset name).
+DATASET_VERSION = "v1"
 
 tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
@@ -187,7 +207,7 @@ ORIGINAL_27_RECORDS = [
                 {"role": "assistant", "content": "Got it, I've selected Emma. Shall we proceed with booking?"},
             ],
             "agent_under_test": "reception",
-        },
+        }, 
         "expectations": "Handles patient switching.",
     },
     {
@@ -562,26 +582,92 @@ NEW_RECORDS = [
 PHASE_B_RECORDS = ORIGINAL_27_RECORDS + NEW_RECORDS
 
 
-def generate_dataset(name: str, records: list):
+def generate_dataset(name: str, records: list, purge: bool = False) -> None:
+    """
+    Create or update an MLflow evaluation dataset.
+
+    Records are passed directly to ``merge_records`` — no field transformation.
+    Every record is stamped with ``{"dataset_version": DATASET_VERSION}`` in its
+    ``tags`` so that consumers can filter or audit by version without changing
+    the dataset name.
+
+    Args:
+        name:    Dataset name (stable across versions — version lives in tags).
+        records: List of dicts with ``inputs`` and ``expectations`` keys, matching
+                 the MLflow EvaluationDataset record schema.
+        purge:   If ``True``, delete all existing records before inserting.
+                 Use this to correct datasets that were seeded with wrong data.
+                 Defaults to ``False`` to avoid accidental data loss.
+    """
     try:
         dataset = get_dataset(name=name)
-        print(f"Dataset {name} already exists. Appending {len(records)} records...")
+        if purge:
+            df = dataset.to_df()
+            existing_ids = df["dataset_record_id"].tolist()
+            if existing_ids:
+                deleted = dataset.delete_records(existing_ids)
+                print(f"  Purged {deleted} existing record(s) from '{name}'.")
+            else:
+                print(f"  Dataset '{name}' exists but has no records to purge.")
+        else:
+            print(f"Dataset '{name}' already exists — merging {len(records)} record(s)...")
     except Exception:
-        print(f"Creating dataset {name}...")
+        print(f"Creating dataset '{name}'...")
         dataset = create_dataset(
             name=name,
             experiment_id=[experiment_id],
         )
 
-    mlflow_records = [{"inputs": r["inputs"], "targets": r["expectations"]} for r in records]
-    dataset.merge_records(mlflow_records)
-    print(f"Dataset {name} now has {len(dataset.to_df())} records.")
+    # MLflow's EvaluationDataset schema requires `expectations` to be a dict, not a str.
+    # Source records store expectations as plain strings for readability; we normalise
+    # them here into {"criteria": str} so the scorer template can reference
+    # {{ expectations.criteria }}.
+    # We also stamp each record with the current dataset_version tag.
+    versioned = [
+        {
+            **r,
+            "expectations": (
+                {"criteria": r["expectations"]}
+                if isinstance(r.get("expectations"), str)
+                else r.get("expectations", {})
+            ),
+            "tags": {**r.get("tags", {}), "dataset_version": DATASET_VERSION},
+        }
+        for r in records
+    ]
+    dataset.merge_records(versioned)
+    print(f"Dataset '{name}' now has {len(dataset.to_df())} record(s) (version={DATASET_VERSION}).")
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Create MLflow evaluation datasets.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Examples:\n"
+            "  Create / merge (safe, default):\n"
+            "    uv run python scripts/create_datasets.py\n\n"
+            "  Purge existing records and re-seed (use to fix bad data):\n"
+            "    uv run python scripts/create_datasets.py --purge\n"
+        ),
+    )
+    parser.add_argument(
+        "--purge",
+        action="store_true",
+        default=False,
+        help=(
+            "Delete all existing records before inserting. "
+            "Use this to correct datasets seeded with incorrect data. "
+            "Not recommended as a routine operation — omit for normal updates."
+        ),
+    )
+    args = parser.parse_args()
+
     print("=" * 60)
     print("Creating Datasets")
+    print(f"  version : {DATASET_VERSION}")
+    print(f"  purge   : {args.purge}")
     print("=" * 60)
-    generate_dataset("sanity-check-5q", SANITY_RECORDS)
-    generate_dataset("prompt-eval-v1", PHASE_B_RECORDS)
+    generate_dataset("sanity-check-5q", SANITY_RECORDS, purge=args.purge)
+    generate_dataset("prompt-eval-v1", PHASE_B_RECORDS, purge=args.purge)
     print("=" * 60)

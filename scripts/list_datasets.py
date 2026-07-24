@@ -27,6 +27,13 @@ import os
 import signal
 import sys
 
+# Load dotenv to get all config values from .env
+from dotenv import load_dotenv
+load_dotenv()
+
+# Prevent MLflow from trying to fetch model catalog updates from GitHub, which causes connection timeouts
+os.environ.setdefault("MLFLOW_MODEL_CATALOG_URI", "")
+
 import numpy as np
 
 from mlflow import MlflowClient
