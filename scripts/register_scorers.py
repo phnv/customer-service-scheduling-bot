@@ -33,7 +33,7 @@ experiment_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "customer-service-bot")
 mlflow.set_experiment(experiment_name)
 
 # Judge model — uses Gemini since it's already configured in the project
-JUDGE_MODEL = "gemini:/gemini-2.5-flash"
+JUDGE_MODEL = "openai:/gpt-4o-mini"
 
 
 def register_scorers():
@@ -186,6 +186,24 @@ Return "yes" if the response is grounded (no hallucinations), "no" if it contain
         feedback_value_type=Literal["yes", "no"],
     )
     scorers.append(("HallucinationCheck", hallucination_check))
+
+    # -----------------------------------------------------------------------
+    # Scorer 6: ExpectationsMet
+    #
+    # Evaluates whether the agent met the specific expectations defined in the dataset.
+    # -----------------------------------------------------------------------
+    expectations_met = make_judge(
+        name="ExpectationsMet",
+        model=JUDGE_MODEL,
+        description="Evaluates whether the agent met the specific expectations defined for the test case.",
+        instructions="""You are evaluating whether an AI customer service agent met the expectations for a test case.
+
+Given the agent's response {{ outputs }} and the expected behavior in {{ expectations }}, determine if the agent's behavior matched the expectations.
+
+Return "yes" if the agent met all expectations, "no" if it failed to meet the expectations.""",
+        feedback_value_type=Literal["yes", "no"],
+    )
+    scorers.append(("ExpectationsMet", expectations_met))
 
     # -----------------------------------------------------------------------
     # Register all scorers
