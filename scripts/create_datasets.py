@@ -582,61 +582,73 @@ NEW_RECORDS = [
 PHASE_B_RECORDS = ORIGINAL_27_RECORDS + NEW_RECORDS
 
 
-def generate_dataset(name: str, records: list, purge: bool = False) -> None:
+def generate_dataset(base_name: str, records: list, purge: bool = False) -> None:
     """
-    Create or update an MLflow evaluation dataset.
-
-    Records are passed directly to ``merge_records`` — no field transformation.
-    Every record is stamped with ``{"dataset_version": DATASET_VERSION}`` in its
-    ``tags`` so that consumers can filter or audit by version without changing
-    the dataset name.
-
-    Args:
-        name:    Dataset name (stable across versions — version lives in tags).
-        records: List of dicts with ``inputs`` and ``expectations`` keys, matching
-                 the MLflow EvaluationDataset record schema.
-        purge:   If ``True``, delete all existing records before inserting.
-                 Use this to correct datasets that were seeded with wrong data.
-                 Defaults to ``False`` to avoid accidental data loss.
+    Create or update MLflow evaluation datasets, partitioned by agent_under_test.
     """
-    try:
-        dataset = get_dataset(name=name)
-        if purge:
-            df = dataset.to_df()
-            existing_ids = df["dataset_record_id"].tolist()
-            if existing_ids:
-                deleted = dataset.delete_records(existing_ids)
-                print(f"  Purged {deleted} existing record(s) from '{name}'.")
+    import re
+    from collections import defaultdict
+    
+    # Partition records by agent_under_test
+    partitions = defaultdict(list)
+    for r in records:
+        agent = r["inputs"].get("agent_under_test", "unknown")
+        partitions[agent].append(r)
+        
+    for agent, agent_records in partitions.items():
+        name = f"{base_name}-{agent}"
+        try:
+            dataset = get_dataset(name=name)
+            if purge:
+                df = dataset.to_df()
+                existing_ids = df["dataset_record_id"].tolist()
+                if existing_ids:
+                    deleted = dataset.delete_records(existing_ids)
+                    print(f"  Purged {deleted} existing record(s) from '{name}'.")
+                else:
+                    print(f"  Dataset '{name}' exists but has no records to purge.")
             else:
-                print(f"  Dataset '{name}' exists but has no records to purge.")
-        else:
-            print(f"Dataset '{name}' already exists — merging {len(records)} record(s)...")
-    except Exception:
-        print(f"Creating dataset '{name}'...")
-        dataset = create_dataset(
-            name=name,
-            experiment_id=[experiment_id],
-        )
+                print(f"Dataset '{name}' already exists — merging {len(agent_records)} record(s)...")
+        except Exception:
+            print(f"Creating dataset '{name}'...")
+            dataset = create_dataset(name=name, experiment_id=[experiment_id])
 
-    # MLflow's EvaluationDataset schema requires `expectations` to be a dict, not a str.
-    # Source records store expectations as plain strings for readability; we normalise
-    # them here into {"criteria": str} so the scorer template can reference
-    # {{ expectations.criteria }}.
-    # We also stamp each record with the current dataset_version tag.
-    versioned = [
-        {
-            **r,
-            "expectations": (
-                {"criteria": r["expectations"]}
-                if isinstance(r.get("expectations"), str)
-                else r.get("expectations", {})
-            ),
-            "tags": {**r.get("tags", {}), "dataset_version": DATASET_VERSION},
-        }
-        for r in records
-    ]
-    dataset.merge_records(versioned)
-    print(f"Dataset '{name}' now has {len(dataset.to_df())} record(s) (version={DATASET_VERSION}).")
+        versioned = []
+        for r in agent_records:
+            exp_str = r.get("expectations", "")
+            if isinstance(exp_str, dict):
+                exp_str = exp_str.get("criteria", "")
+            
+            # Auto-extract expected route
+            expected_route = None
+            if "Routes to" in exp_str:
+                match = re.search(r"Routes to (\w+) intent", exp_str)
+                if match:
+                    expected_route = match.group(1)
+            
+            # Auto-extract expected tools
+            expected_tools = []
+            tool_matches = re.findall(r"(\w+_tool)", exp_str)
+            if tool_matches:
+                # Exclude if it says "Does NOT call X_tool"
+                if "Does NOT call" not in exp_str:
+                    expected_tools = list(set(tool_matches))
+
+            expectations_dict = {"criteria": exp_str}
+            if expected_route is not None:
+                expectations_dict["expected_route"] = expected_route
+            if expected_tools:
+                expectations_dict["expected_tools"] = expected_tools
+            
+            versioned.append({
+                **r,
+                "expectations": expectations_dict,
+                "tags": {**r.get("tags", {}), "dataset_version": DATASET_VERSION},
+            })
+
+        dataset.merge_records(versioned)
+        print(f"Dataset '{name}' now has {len(dataset.to_df())} record(s) (version={DATASET_VERSION}).")
+
 
 
 if __name__ == "__main__":
