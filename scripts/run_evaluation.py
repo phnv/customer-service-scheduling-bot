@@ -117,7 +117,7 @@ except ImportError as e:
 # ---------------------------------------------------------------------------
 # predict_fn wrapper
 #
-# Why this wrapper exists:
+# Why this wrapper exists: UNDO THIS WORKAROUND AT SOME POINT
 #   mlflow.genai.evaluate() calls predict_fn(**inputs) — it unpacks the dataset
 #   inputs dict as keyword arguments. Our dataset records have three fields:
 #     { user_message, conversation_history, agent_under_test }
@@ -162,6 +162,10 @@ def predict_fn(
 # -----------------------------------------------------------------------
 
 import re
+import json
+from mlflow.genai import scorer
+from mlflow.entities import Feedback
+from mlflow.genai.scorers import ToolCallCorrectness
 
 def extract_section(text, header):
     pattern = rf"=== {header} ===\n(.*?)(?=\n===|$)"
@@ -170,44 +174,20 @@ def extract_section(text, header):
         return match.group(1).strip()
     return None
 
-def calculate_route_match(predictions, expectations):
-    scores = []
-    for pred, exp in zip(predictions, expectations):
-        try:
-            exp_dict = json.loads(exp) if isinstance(exp, str) else exp
-            t_intent = exp_dict.get("expected_route")
-            
-            if not t_intent:
-                # Not relevant for this record
-                continue
-                
-            p_intent = extract_section(pred, "INTENT")
-            scores.append(1.0 if p_intent == t_intent else 0.0)
-        except Exception:
-            scores.append(0.0)
-    
-    return sum(scores) / len(scores) if scores else None
-
-
-def calculate_tool_match(predictions, expectations):
-    scores = []
-    for pred, exp in zip(predictions, expectations):
-        try:
-            exp_dict = json.loads(exp) if isinstance(exp, str) else exp
-            t_tools = exp_dict.get("expected_tools")
-            
-            if t_tools is None or not isinstance(t_tools, list):
-                continue
-                
-            p_tools_str = extract_section(pred, "TOOLS")
-            p_tools = set(json.loads(p_tools_str) if p_tools_str else [])
-            t_tools = set(t_tools)
-            
-            scores.append(1.0 if p_tools == t_tools else 0.0)
-        except Exception:
-            scores.append(0.0)
-            
-    return sum(scores) / len(scores) if scores else None
+@scorer(name="route_match")
+def route_match_scorer(outputs: dict, expectations: dict) -> Feedback:
+    try:
+        t_intent = expectations.get("expected_route")
+        if not t_intent:
+            return Feedback(score=1.0, justification="No route expectation provided.")
+        
+        response_text = outputs.get("response", "")
+        p_intent = extract_section(response_text, "INTENT")
+        
+        score = 1.0 if p_intent == t_intent else 0.0
+        return Feedback(score=score, justification=f"Expected: {t_intent}, Got: {p_intent}")
+    except Exception as e:
+        return Feedback(score=0.0, justification=f"Error: {e}")
 
 # ---------------------------------------------------------------------------
 # Run evaluation
@@ -239,8 +219,15 @@ for agent in agents_to_test:
             print(f"  Skipping {partition_name}: 0 records.\n")
             continue
             
-        # MLflow genai.evaluate ONLY accepts registered LLM Scorers
-        scorer_names = [s.name for s in registered_scorers]
+        heuristics_to_run = agent_heuristics.get(agent, [])
+        active_scorers = list(registered_scorers)
+        
+        if "route_match" in heuristics_to_run:
+            active_scorers.append(route_match_scorer)
+        if "tool_match" in heuristics_to_run:
+            active_scorers.append(ToolCallCorrectness(should_exact_match=True))
+            
+        scorer_names = [s.name if hasattr(s, "name") else s.__class__.__name__ for s in active_scorers]
         
         print(f"  Dataset : {partition_name} ({len(df)} records)")
         print(f"  Scorers : {scorer_names}")
@@ -249,32 +236,8 @@ for agent in agents_to_test:
             results = mlflow.genai.evaluate(
                 data=df,
                 predict_fn=predict_fn,
-                scorers=registered_scorers,
+                scorers=active_scorers,
             )
-            
-            # Calculate Python heuristic metrics
-            run_id = run.info.run_id
-            predictions = results.tables["eval_results"]["response"].tolist()
-            expectations = df["expectations"].tolist()
-            
-            heuristics_to_run = agent_heuristics.get(agent, [])
-            custom_metrics = {}
-            
-            if "route_match" in heuristics_to_run:
-                score = calculate_route_match(predictions, expectations)
-                if score is not None:
-                    custom_metrics["route_match"] = score
-                    
-            if "tool_match" in heuristics_to_run:
-                score = calculate_tool_match(predictions, expectations)
-                if score is not None:
-                    custom_metrics["tool_match"] = score
-                    
-            # Log custom metrics to the active run
-            if custom_metrics:
-                for k, v in custom_metrics.items():
-                    mlflow.log_metric(k, v)
-                    results.metrics[k] = v
         
         if hasattr(results, "metrics") and results.metrics:
             print("  Metrics:")
