@@ -23,12 +23,10 @@ import os
 import uuid
 from typing import Any
 
-import mlflow
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
-from mlflow.entities import SpanType
 
 from app.agents.booking_agent import booking_node
 from app.agents.coordinator import coordinator_node, route_after_coordinator
@@ -40,19 +38,7 @@ from app.prompts import ESCALATION_MESSAGE
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# MLflow Tracing Configuration
-# ---------------------------------------------------------------------------
 load_dotenv()
-
-_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
-mlflow.set_tracking_uri(_tracking_uri)
-
-_experiment_name = os.getenv("MLFLOW_EXPERIMENT_NAME", "customer-service-bot")
-mlflow.set_experiment(_experiment_name)
-
-# Auto-instrument LangChain / LangGraph calls
-mlflow.langchain.autolog()
 
 # ---------------------------------------------------------------------------
 # Escalation Node (static gateway — not a ReAct agent)
@@ -141,7 +127,6 @@ _graph = _build_graph()
 # Public API
 # ---------------------------------------------------------------------------
 
-@mlflow.trace(name="run_agent", span_type=SpanType.CHAIN)
 def run_agent(user_message: str, conversation_id: str | None = None) -> tuple[str, dict[str, Any]]:
     """
     Process a user message through the multi-agent pipeline and return the response and state.
