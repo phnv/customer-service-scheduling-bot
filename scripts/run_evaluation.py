@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # ---------------------------------------------------------------------------
 import mlflow
 from mlflow.genai.datasets import get_dataset
-from mlflow.genai.scorers import list_scorers
+from mlflow.genai.scorers import list_scorers, RetrievalGroundedness
 
 os.environ.setdefault("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 os.environ.setdefault("MLFLOW_EXPERIMENT_ID", "1")
@@ -131,7 +131,7 @@ def predict_fn(
     conversation_history: list | None = None,
     agent_under_test: str | None = None,
     **kwargs,
-) -> str:
+) -> dict:
     response, state = run_agent(user_message=user_message)
     
     intent = state.get("intent")
@@ -155,7 +155,13 @@ def predict_fn(
     output_text += f"=== CONTEXT ===\n{json.dumps(context)}\n\n"
     output_text += f"=== RESPONSE ===\n{response}\n"
     
-    return output_text
+    if not context.strip():
+        context = "No tool called"
+        
+    return {
+        "response": output_text,
+        "context": context
+    }
 
 # ---------------------------------------------------------------------------
 # Zero-Token Python Heuristics (Replaces Trace Judges)
@@ -226,6 +232,9 @@ for agent in agents_to_test:
             active_scorers.append(route_match_scorer)
         if "tool_match" in heuristics_to_run:
             active_scorers.append(ToolCallCorrectness(should_exact_match=True))
+            
+        groundedness = RetrievalGroundedness(model="openai:/gpt-4o-mini")
+        active_scorers.append(groundedness)
             
         scorer_names = [s.name if hasattr(s, "name") else s.__class__.__name__ for s in active_scorers]
         

@@ -76,7 +76,7 @@ This will open the chat interface, complete with demo controls for external even
 
 ### 5. Prompt Evaluation
 
-The evaluation pipeline uses **MLflow** with 6 LLM-as-a-Judge scorers backed by OpenAI `gpt-4o-mini`. The chatbot runs on Gemini; these are two independent providers — no proxying between them.
+The evaluation pipeline uses **MLflow** with 3 LLM-as-a-Judge scorers backed by OpenAI `gpt-4o-mini` and 2 deterministic zero-token Python scorers (including `ToolCallCorrectness`). The chatbot runs on Gemini; these are two independent providers — no proxying between them.
 
 > **⚠️ IMPORTANT:** You must have both `GEMINI_API_KEY` and `OPENAI_API_KEY` set in your `.env` to run evaluations.
 

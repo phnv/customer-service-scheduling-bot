@@ -94,27 +94,7 @@ def register_scorers():
     )
     scorers.append(("ExpectationsMet", expectations_met))
     
-    # -----------------------------------------------------------------------
-    # Scorer 3: Faithfulness (Replaces HallucinationCheck)
-    # -----------------------------------------------------------------------
-    faithfulness = make_judge(
-        name="Faithfulness",
-        model=JUDGE_MODEL,
-        description="Checks if the agent's response is grounded in the tool context.",
-        instructions="""
-    You are evaluating whether an agent's response is faithful to the provided context.
-    
-    From the output {{ outputs }}, extract two sections:
-    1. The text under === CONTEXT ===
-    2. The text under === RESPONSE ===
-    
-    Determine if the information in the RESPONSE is completely supported by and grounded in the CONTEXT.
-    If the RESPONSE contains claims, facts, or data not present in the CONTEXT, return "no".
-    If the RESPONSE is entirely supported by the CONTEXT, return "yes".
-    """,
-        feedback_value_type=Literal["yes", "no"],
-    )
-    scorers.append(("Faithfulness", faithfulness))
+
 
     # -----------------------------------------------------------------------
     # Register all scorers

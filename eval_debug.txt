@@ -1,0 +1,203 @@
+INFO:sentence_transformers.base.model:No device provided, using cpu
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/modules.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config_sentence_transformers.json "HTTP/1.1 200 OK"
+INFO:sentence_transformers.base.model:Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config_sentence_transformers.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/modules.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/sentence_bert_config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/sentence_bert_config.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/adapter_config.json "HTTP/1.1 404 Not Found"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json "HTTP/1.1 200 OK"
+============================================================
+MLflow Agent Evaluation
+============================================================
+
+Loading evaluation dataset...
+  Dataset: sanity-check-5q
+  Records: 5
+  Input keys: ['user_message', 'conversation_history', 'agent_under_test']
+
+Loading registered scorers...
+  Found 6 registered scorer(s):
+    - DomainContainment
+    - ExpectationsMet
+    - HallucinationCheck
+    - ResponseQuality
+    - RoutingAccuracy
+    - ToolSelection
+
+Importing agent entry point...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1199.47it/s]
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer_config.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer_config.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/1_Pooling/config.json "HTTP/1.1 307 Temporary Redirect"
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/1_Pooling%2Fconfig.json "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2 "HTTP/1.1 200 OK"
+/home/phen/projects/customer-service-scheduling-bot/app/services/faq_service.py:13: LangChainDeprecationWarning: The class `Chroma` was deprecated in LangChain 0.2.9 and will be removed in 1.0. An updated version of the class exists in the `langchain-chroma package and should be used instead. To use it run `pip install -U `langchain-chroma` and import as `from `langchain_chroma import Chroma``.
+  self.vectorstore = Chroma(
+2026/07/23 13:39:10 INFO mlflow.models.evaluation.utils.trace: Auto tracing is temporarily enabled during the model evaluation for computing some metrics and debugging. To disable tracing, call `mlflow.autolog(disable=True)`.
+2026/07/23 13:39:10 INFO mlflow.genai.utils.data_validation: Testing model prediction with the first sample in the dataset. To disable this check, set the MLFLOW_GENAI_EVAL_SKIP_TRACE_VALIDATION environment variable to True.
+WARNING:app.agents.graph:[Graph] No conversation_id provided — generated ephemeral ID: 2e88336d-5e16-4805-b0c3-bcbdedebf92b
+INFO:app.agents.graph:[Graph] run_agent called. conversation_id='2e88336d-5e16-4805-b0c3-bcbdedebf92b', message='Do you have anything next Tuesday with a cardiologist?'
+INFO:app.agents.coordinator:[Coordinator] Classifying intent...
+INFO:google_genai.models:AFC is enabled with max remote calls: 10.
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:app.agents.coordinator:[Coordinator] LLM raw response: '{"intent": "booking", "flow": "booking", "conversation_summary": "The user is inquiring about cardiologist availability for next Tuesday."}'
+INFO:app.agents.coordinator:[Coordinator] Resolved intent='booking', flow='booking'
+INFO:app.agents.coordinator:[Coordinator] Updated conversation_summary: 'The user is inquiring about cardiologist availability for next Tuesday.'
+INFO:app.agents.coordinator:[Coordinator] Routing to: 'reception' (intent='booking')
+INFO:app.agents.reception_agent:[Reception] Starting contact identification...
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:app.agents.reception_agent:[Reception] Done. contact_id=None, patient_id=None
+INFO:app.agents.graph:[Graph] Missing contact_id or patient_id. Waiting for user input (END).
+INFO:app.agents.graph:[Graph] Response: 'Hello! Are you already registered with us? If so, could you share your full name and phone number (or email) so I can pu'...
+  ✓ Imported run_agent from app.agents.graph
+
+============================================================
+Running Evaluation
+============================================================
+
+  Dataset: sanity-check-5q (5 records)
+  Scorers: ['DomainContainment', 'ExpectationsMet', 'HallucinationCheck', 'ResponseQuality', 'RoutingAccuracy', 'ToolSelection']
+  Entry point: app.agents.graph.run_agent
+
+Evaluating:   0%|          | 0/5 [Elapsed: 00:00, Remaining: ?]WARNING:app.agents.graph:[Graph] No conversation_id provided — generated ephemeral ID: d6c9d218-9152-466a-b540-c0ea043c4db5
+INFO:app.agents.graph:[Graph] run_agent called. conversation_id='d6c9d218-9152-466a-b540-c0ea043c4db5', message='Do you have anything next Tuesday with a cardiologist?'
+WARNING:app.agents.graph:[Graph] No conversation_id provided — generated ephemeral ID: 12bd65d4-2dbf-49a3-866c-b8158c64ba21
+INFO:app.agents.graph:[Graph] run_agent called. conversation_id='12bd65d4-2dbf-49a3-866c-b8158c64ba21', message="What happens if I'm late to my appointment?"
+WARNING:app.agents.graph:[Graph] No conversation_id provided — generated ephemeral ID: 871575cd-a3a1-46f9-ad6f-954a7b9d78af
+WARNING:app.agents.graph:[Graph] No conversation_id provided — generated ephemeral ID: 26b0424b-1995-4e45-a2fc-58c0209a2b61
+INFO:app.agents.graph:[Graph] run_agent called. conversation_id='26b0424b-1995-4e45-a2fc-58c0209a2b61', message="This is ridiculous! I've been waiting for 3 hours. Let me speak to a manager rig"...
+INFO:app.agents.graph:[Graph] run_agent called. conversation_id='871575cd-a3a1-46f9-ad6f-954a7b9d78af', message="I'd like to book an appointment with Dr. Sarah Collins."
+WARNING:app.agents.graph:[Graph] No conversation_id provided — generated ephemeral ID: 2a7cb5d8-506b-4908-b1e8-a0522ac5bbae
+INFO:app.agents.graph:[Graph] run_agent called. conversation_id='2a7cb5d8-506b-4908-b1e8-a0522ac5bbae', message="Hi, I'd like to book an appointment."
+INFO:app.agents.coordinator:[Coordinator] Classifying intent...
+INFO:app.agents.coordinator:[Coordinator] Classifying intent...
+INFO:app.agents.coordinator:[Coordinator] Classifying intent...
+INFO:app.agents.coordinator:[Coordinator] Classifying intent...
+INFO:app.agents.coordinator:[Coordinator] Classifying intent...
+INFO:google_genai.models:AFC is enabled with max remote calls: 10.
+INFO:google_genai.models:AFC is enabled with max remote calls: 10.
+INFO:google_genai.models:AFC is enabled with max remote calls: 10.
+INFO:google_genai.models:AFC is enabled with max remote calls: 10.
+INFO:google_genai.models:AFC is enabled with max remote calls: 10.
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:app.agents.coordinator:[Coordinator] LLM raw response: '{"intent": "booking", "flow": "booking", "conversation_summary": "The user is inquiring about appointment availability with a cardiologist for next Tuesday."}'
+INFO:app.agents.coordinator:[Coordinator] Resolved intent='booking', flow='booking'
+INFO:app.agents.coordinator:[Coordinator] Updated conversation_summary: 'The user is inquiring about appointment availability with a cardiologist for next Tuesday.'
+INFO:app.agents.coordinator:[Coordinator] Routing to: 'reception' (intent='booking')
+INFO:app.agents.reception_agent:[Reception] Starting contact identification...
+INFO:app.agents.coordinator:[Coordinator] LLM raw response: '{"intent": "booking", "flow": "booking", "conversation_summary": "The user wants to book a new appointment."}'
+INFO:app.agents.coordinator:[Coordinator] Resolved intent='booking', flow='booking'
+INFO:app.agents.coordinator:[Coordinator] Updated conversation_summary: 'The user wants to book a new appointment.'
+INFO:app.agents.coordinator:[Coordinator] Routing to: 'reception' (intent='booking')
+INFO:app.agents.reception_agent:[Reception] Starting contact identification...
+INFO:app.agents.coordinator:[Coordinator] LLM raw response: '{"intent": "booking", "flow": "booking", "conversation_summary": "The user wants to book an appointment with Dr. Sarah Collins."}'
+INFO:app.agents.coordinator:[Coordinator] Resolved intent='booking', flow='booking'
+INFO:app.agents.coordinator:[Coordinator] Updated conversation_summary: 'The user wants to book an appointment with Dr. Sarah Collins.'
+INFO:app.agents.coordinator:[Coordinator] Routing to: 'reception' (intent='booking')
+INFO:app.agents.reception_agent:[Reception] Starting contact identification...
+INFO:app.agents.coordinator:[Coordinator] LLM raw response: '{"intent": "escalation", "flow": null, "conversation_summary": "The user is frustrated about waiting and requested to speak with a manager."}'
+INFO:app.agents.coordinator:[Coordinator] Resolved intent='escalation', flow=None
+INFO:app.agents.coordinator:[Coordinator] Updated conversation_summary: 'The user is frustrated about waiting and requested to speak with a manager.'
+INFO:app.agents.coordinator:[Coordinator] Routing to: 'escalation' (intent='escalation')
+INFO:app.agents.graph:[Escalation] Routing to human escalation.
+INFO:app.agents.graph:[Graph] Response: 'Thank you for reaching out. This requires personal attention from one of our staff members. Someone will contact you sho'...
+INFO:app.agents.coordinator:[Coordinator] LLM raw response: '{"intent": "faq", "flow": "faq", "conversation_summary": "The user is asking about the clinic\'s policy regarding late arrivals for appointments."}'
+INFO:app.agents.coordinator:[Coordinator] Resolved intent='faq', flow='faq'
+INFO:app.agents.coordinator:[Coordinator] Updated conversation_summary: "The user is asking about the clinic's policy regarding late arrivals for appointments."
+INFO:app.agents.coordinator:[Coordinator] Routing to: 'faq' (intent='faq')
+INFO:app.agents.faq_agent:[FAQ] Starting knowledge base lookup...
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:app.agents.reception_agent:[Reception] Done. contact_id=None, patient_id=None
+INFO:app.agents.graph:[Graph] Missing contact_id or patient_id. Waiting for user input (END).
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:app.agents.reception_agent:[Reception] Done. contact_id=None, patient_id=None
+INFO:app.agents.graph:[Graph] Missing contact_id or patient_id. Waiting for user input (END).
+INFO:app.agents.graph:[Graph] Response: 'Hello! Are you already registered with us? If so, could you share your full name and phone number (or email) so I can pu'...
+INFO:app.agents.graph:[Graph] Response: 'Hello! Are you already registered with us? If so, could you share your full name and phone number (or email) so I can pu'...
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:app.agents.reception_agent:[Reception] Done. contact_id=None, patient_id=None
+INFO:app.agents.graph:[Graph] Missing contact_id or patient_id. Waiting for user input (END).
+INFO:app.agents.graph:[Graph] Response: 'Hello! Are you already registered with us? If so, could you share your full name and phone number (or email) so I can pu'...
+INFO:app.tools.faq_tools:Tool 'search_faq_tool' called with query: 'late to appointment policy'
+INFO:app.services.faq_service:[FAQService] Searching knowledge base for: 'late to appointment policy'
+INFO:app.tools.faq_tools:Retrieved 3 chunks from knowledge base.
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: github.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+WARNING:urllib3.connectionpool:Connection pool is full, discarding connection: release-assets.githubusercontent.com. Connection pool size: 10
+INFO:app.agents.faq_agent:[FAQ] Knowledge base response complete.
+INFO:app.agents.graph:[Graph] Response: "If you arrive more than 15 minutes late for your appointment, it may be rescheduled at the doctor's discretion. It's bes"...
+Evaluating:  20%|██        | 1/5 [Elapsed: 00:17, Remaining: 01:08]Evaluating:  40%|████      | 2/5 [Elapsed: 00:17, Remaining: 00:25]Evaluating:  80%|████████  | 4/5 [Elapsed: 00:17, Remaining: 00:04]Evaluating: 100%|██████████| 5/5 [Elapsed: 00:18, Remaining: 00:00] [predict_fn: 74%, scorers: 26%]Evaluating: 100%|██████████| 5/5 [Elapsed: 00:18, Remaining: 00:00] [predict_fn: 74%, scorers: 26%]
+2026/07/23 13:39:34 WARNING mlflow.genai.evaluation.harness: Some scorer invocations failed during evaluation. Failure summary: 'DomainContainment': 5/5 failed, 'ExpectationsMet': 5/5 failed, 'HallucinationCheck': 5/5 failed, 'RoutingAccuracy': 5/5 failed, 'ToolSelection': 5/5 failed. Check individual trace assessments for detailed error messages.
+
+✨ Evaluation completed.
+
+Metrics and evaluation results are logged to the MLflow run:
+  Run name: [94mstylish-koi-787[0m
+  Run ID: [94m9706a71f7376455ba5a67580bae0f8f6[0m
+
+To view the detailed evaluation results with sample-wise scores,
+open the [93m[1mTraces[0m tab in the Run page in the MLflow UI.
+
+
+============================================================
+Evaluation Results
+============================================================
+
+
+============================================================
+Evaluation Complete
+============================================================

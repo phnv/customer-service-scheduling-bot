@@ -27,6 +27,14 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+import mlflow
+import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Increase CSV field size limit for large traces
+csv.field_size_limit(sys.maxsize)
 
 
 class EvaluationLoadError(Exception):
@@ -248,6 +256,108 @@ def load_evaluation_results(input_file: str) -> dict[str, list[dict]]:
 
 
 # ---------------------------------------------------------------------------
+# MLflow DB format (run_ids)
+# ---------------------------------------------------------------------------
+
+def load_traces_from_runs(run_ids: list[str]) -> tuple[dict[str, list[dict]], list[dict]]:
+    """Fetch traces directly from MLflow for a given list of run IDs.
+    Returns:
+        scorer_results: Dictionary mapping scorer names to list of result dicts.
+        detailed_failures: List of dicts with full trace request, response, and failure rationales.
+    """
+    scorer_results: dict[str, list[dict]] = defaultdict(list)
+    detailed_failures = []
+    
+    import os
+    experiment_id = os.environ.get("MLFLOW_EXPERIMENT_ID", "1")
+    
+    traces_list = []
+    for run_id in run_ids:
+        try:
+            print(f"Fetching traces for run {run_id}...")
+            # We use max_results to pull as many traces as possible for the run.
+            run_traces = mlflow.search_traces(experiment_ids=[experiment_id], max_results=500, run_id=run_id)
+            if run_traces is not None and not run_traces.empty:
+                traces_list.append(run_traces)
+        except Exception as e:
+            print(f"Failed to fetch traces for run {run_id}: {e}")
+            
+    if not traces_list:
+        raise EvaluationLoadError("No traces found for the provided run IDs.")
+        
+    traces_df = pd.concat(traces_list, ignore_index=True)
+    
+    for _, row in traces_df.iterrows():
+        trace_id = row.get("trace_id", "unknown")
+        request_text = row.get("request", "")
+        response_text = row.get("response", "")
+        assessments = row.get("assessments", [])
+        
+        query = _extract_query_from_cell(request_text)
+        
+        has_trace_failure = False
+        trace_failures = []
+        
+        if not assessments or not isinstance(assessments, list):
+            continue
+            
+        for assessment in assessments:
+            if assessment.get("source", {}).get("source_type") == "HUMAN":
+                continue
+                
+            feedback = assessment.get("feedback", {})
+            error_code = assessment.get("error_code")
+            error_message = assessment.get("error_message")
+            rationale = assessment.get("rationale")
+            expectation_raw = assessment.get("expectation")
+            expectation = expectation_raw.get("value") if isinstance(expectation_raw, dict) else str(expectation_raw) if expectation_raw else None
+            
+            scorer_name = assessment.get("assessment_name", "UnknownScorer")
+            val = feedback.get("value")
+            
+            # Check pass/fail logic
+            has_failure = False
+            passed = False
+            
+            if error_code is not None or error_message is not None:
+                has_failure = True
+                passed = False
+                error_reason = error_message or str(error_code)
+            elif val is None or str(val).lower() != "yes":
+                has_failure = True
+                passed = False
+                error_reason = "No error rationale"
+            else:
+                passed = True
+                
+            scorer_results[scorer_name].append({
+                "query": query,
+                "trace_id": trace_id,
+                "passed": passed,
+                "rationale": rationale,
+            })
+            
+            if has_failure:
+                has_trace_failure = True
+                trace_failures.append({
+                    "scorer_name": scorer_name,
+                    "error_reason": error_reason if (error_code or error_message) else None,
+                    "rationale": rationale,
+                    "expectation": expectation
+                })
+                
+        if has_trace_failure:
+            detailed_failures.append({
+                "trace_id": trace_id,
+                "request": request_text,
+                "response": response_text,
+                "failures": trace_failures
+            })
+            
+    return scorer_results, detailed_failures
+
+
+# ---------------------------------------------------------------------------
 # Analysis
 # ---------------------------------------------------------------------------
 
@@ -382,6 +492,7 @@ def generate_report(
     patterns: list[dict],
     recommendations: list[dict],
     output_file: str,
+    detailed_failures: list[dict] = None,
 ) -> None:
     """Generate markdown evaluation report."""
     total_queries = max(len(v) for v in scorer_results.values()) if scorer_results else 0
@@ -451,6 +562,37 @@ def generate_report(
                 ]
             )
 
+    if detailed_failures:
+        lines.extend(["## Deep Dive into Failures", ""])
+        for fail_record in detailed_failures:
+            trace_id = fail_record['trace_id']
+            # Truncate response to ~300 chars for readability
+            response_preview = str(fail_record['response'])
+            if len(response_preview) > 300:
+                response_preview = response_preview[:300] + "... (truncated)"
+            
+            lines.extend([
+                f"### Trace: `{trace_id}`",
+                "",
+                f"**Request**: `{_extract_query_from_cell(fail_record['request'])}`",
+                "",
+                "**Response Preview**:",
+                "```text",
+                response_preview,
+                "```",
+                "",
+                "**Failed Assessments**:",
+            ])
+            for f in fail_record['failures']:
+                lines.append(f"- **{f['scorer_name']}**")
+                if f['expectation']:
+                    lines.append(f"  - *Expectation*: {f['expectation']}")
+                if f['rationale']:
+                    lines.append(f"  - *Rationale*: {f['rationale']}")
+                if f['error_reason']:
+                    lines.append(f"  - *Error*: {f['error_reason']}")
+            lines.append("")
+
     lines.extend(
         [
             "## Next Steps",
@@ -492,11 +634,13 @@ def main() -> None:
         print(
             "Usage: python scripts/analyze_results.py <evaluation_results.csv> [--output report.md]"
         )
+        print("       python scripts/analyze_results.py --run-ids run1,run2 [--output report.md]")
         print("       python scripts/analyze_results.py --results-path evaluation_results.csv")
         sys.exit(1)
 
     input_file = None
     output_file = "evaluation_report.md"
+    run_ids = []
 
     i = 0
     while i < len(args):
@@ -506,28 +650,41 @@ def main() -> None:
         elif args[i] == "--results-path" and i + 1 < len(args):
             input_file = args[i + 1]
             i += 2
+        elif args[i] == "--run-ids" and i + 1 < len(args):
+            run_ids = [r.strip() for r in args[i + 1].split(",") if r.strip()]
+            i += 2
         elif not args[i].startswith("--"):
             input_file = args[i]
             i += 1
         else:
             i += 1
 
-    if input_file is None:
-        print("✗ No input file specified")
+    if input_file is None and not run_ids:
+        print("✗ No input file or run IDs specified")
         sys.exit(1)
 
-    # Detect format and load
-    suffix = Path(input_file).suffix.lower()
-    fmt = "CSV (mlflow.genai.evaluate)" if suffix == ".csv" else (
-        "JSON (legacy mlflow traces evaluate)" if suffix == ".json" else "auto-detect"
-    )
-    print(f"Loading evaluation results from: {input_file}")
-    print(f"Format: {fmt}")
-    try:
-        scorer_results = load_evaluation_results(input_file)
-    except EvaluationLoadError as e:
-        print(f"✗ {e}")
-        sys.exit(1)
+    detailed_failures = None
+
+    if run_ids:
+        print(f"Loading traces for run IDs: {', '.join(run_ids)}")
+        try:
+            scorer_results, detailed_failures = load_traces_from_runs(run_ids)
+        except EvaluationLoadError as e:
+            print(f"✗ {e}")
+            sys.exit(1)
+    else:
+        # Detect format and load
+        suffix = Path(input_file).suffix.lower()
+        fmt = "CSV (mlflow.genai.evaluate)" if suffix == ".csv" else (
+            "JSON (legacy mlflow traces evaluate)" if suffix == ".json" else "auto-detect"
+        )
+        print(f"Loading evaluation results from: {input_file}")
+        print(f"Format: {fmt}")
+        try:
+            scorer_results = load_evaluation_results(input_file)
+        except EvaluationLoadError as e:
+            print(f"✗ {e}")
+            sys.exit(1)
 
     if not scorer_results:
         print("✗ No scorer results found")
@@ -570,7 +727,7 @@ def main() -> None:
 
     # Generate report
     print("Generating markdown report...")
-    generate_report(scorer_results, pass_rates, patterns, recommendations, output_file)
+    generate_report(scorer_results, pass_rates, patterns, recommendations, output_file, detailed_failures)
     print()
 
     print("=" * 60)
