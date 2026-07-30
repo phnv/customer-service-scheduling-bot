@@ -12,8 +12,8 @@ contact_id is available in state.
 
 from __future__ import annotations
 
+import json
 import logging
-import re
 from typing import Any
 
 from langgraph.prebuilt import create_react_agent
@@ -92,15 +92,19 @@ def booking_node(state: AgentState) -> dict[str, Any]:
 
     new_messages = result.get("messages", [])
 
-    # Attempt to extract active_reservation_id from tool outputs
     reservation_id = state.get("active_reservation_id")
     for msg in new_messages:
-        content = extract_text_content(msg)
-        if content:
-            extracted = _extract_reservation_id(content)
-            if extracted and not reservation_id:
-                reservation_id = extracted
-                logger.info(f"[Booking] Extracted reservation_id: {reservation_id}")
+        if getattr(msg, "type", None) == "tool":
+            try:
+                data = json.loads(msg.content)
+            except (json.JSONDecodeError, TypeError):
+                data = msg.content
+                
+            if msg.name == "reserve_slot_tool" and isinstance(data, dict):
+                extracted = data.get("reservation_id")
+                if extracted and not reservation_id:
+                    reservation_id = str(extracted)
+                    logger.info(f"[Booking] Extracted reservation_id from {msg.name}: {reservation_id}")
 
     logger.info("[Booking] Scheduling flow complete.")
 
@@ -154,11 +158,4 @@ def _build_context_note(state: AgentState) -> str | None:
     )
 
 
-def _extract_reservation_id(text: str) -> str | None:
-    """
-    Attempt to extract a reservation_id from tool output text.
-    """
-    match = re.search(r'[\'"]reservation_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
-    if match:
-        return match.group(1)
-    return None
+

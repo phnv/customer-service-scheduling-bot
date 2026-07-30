@@ -1,41 +1,11 @@
-import json
-import re
+from app.agents.graph import run_agent
 
-def robust_json_loads(s, **kwargs):
-    try:
-        return json.loads(s, **kwargs)
-    except json.JSONDecodeError:
-        pass
-    
-    cleaned = s.strip()
-    
-    # 1. Strip markdown code blocks
-    if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```[a-zA-Z]*\n?", "", cleaned)
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3].strip()
-            
-    # 2. Fix invalid escaped quotes
-    cleaned = cleaned.replace("\\'", "'")
-    
-    # 3. Handle unescaped newlines (strict=False)
-    kwargs['strict'] = False
-    
-    try:
-        return json.loads(cleaned, **kwargs)
-    except json.JSONDecodeError as e:
-        raise e
-
-# Tests
-cases = [
-    r'{"msg": "doctor\'s appointment"}',
-    "```json\n{\"msg\": \"hello\"}\n```",
-    "{\"msg\": \"hello\nworld\"}"
-]
-
-for c in cases:
-    try:
-        print("Parsing:", repr(c))
-        print("Result:", robust_json_loads(c))
-    except Exception as e:
-        print("Failed:", e)
+print("--- Starting Agent Test ---")
+response, state = run_agent("I want to book an appointment. My name is John Doe, phone +15550001234.")
+print("\n--- Response ---")
+print(response)
+print("\n--- State ---")
+print("Contact ID:", state.get("contact_id"))
+print("Patient ID:", state.get("patient_id"))
+print("Intent:", state.get("intent"))
+print("Flow:", state.get("flow"))

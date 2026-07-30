@@ -11,8 +11,8 @@ the contact_id into the shared AgentState for downstream agents.
 
 from __future__ import annotations
 
+import json
 import logging
-import re
 from typing import Any
 
 from langchain_core.messages import AIMessage, SystemMessage
@@ -20,7 +20,6 @@ from langgraph.prebuilt import create_react_agent
 
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
-from app.agents.utils import extract_text_content
 from app.prompts import (
     GLOBAL_PROMPT,
     RECEPTION_PROMPT,
@@ -94,17 +93,29 @@ def reception_node(state: AgentState) -> dict[str, Any]:
     patient_id = state.get("patient_id")
 
     for msg in new_messages:
-        content = extract_text_content(msg)
-        if content:
-            extracted_contact = _extract_contact_id(content)
-            if extracted_contact and not contact_id:
-                contact_id = extracted_contact
-                logger.info(f"[Reception] Extracted contact_id: {contact_id}")
+        if getattr(msg, "type", None) == "tool":
+            try:
+                data = json.loads(msg.content)
+            except (json.JSONDecodeError, TypeError):
+                data = msg.content
 
-            extracted_patient = _extract_patient_id(content)
-            if extracted_patient and not patient_id:
-                patient_id = extracted_patient
-                logger.info(f"[Reception] Extracted patient_id: {patient_id}")
+            if msg.name == "create_contact_tool" and isinstance(data, str) and not contact_id:
+                contact_id = data
+                logger.info(f"[Reception] Extracted contact_id from create_contact_tool: {contact_id}")
+            elif msg.name in ["find_contact_tool", "update_contact_tool"] and isinstance(data, dict):
+                extracted = data.get("contact_id")
+                if extracted and not contact_id:
+                    contact_id = str(extracted)
+                    logger.info(f"[Reception] Extracted contact_id from {msg.name}: {contact_id}")
+
+            if msg.name == "create_patient_tool" and isinstance(data, str) and not patient_id:
+                patient_id = data
+                logger.info(f"[Reception] Extracted patient_id from create_patient_tool: {patient_id}")
+            elif msg.name == "select_patient_tool" and isinstance(data, dict):
+                extracted = data.get("selected_patient_id")
+                if extracted and not patient_id:
+                    patient_id = str(extracted)
+                    logger.info(f"[Reception] Extracted patient_id from {msg.name}: {patient_id}")
 
     logger.info(
         f"[Reception] Done. contact_id={contact_id!r}, patient_id={patient_id!r}"
@@ -132,20 +143,4 @@ def _build_context_note(state: AgentState) -> str | None:
     return None
 
 
-def _extract_contact_id(text: str) -> str | None:
-    """
-    Attempt to extract a contact_id from tool output text.
-    """
-    match = re.search(r'[\'"]contact_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
-    if match:
-        return match.group(1)
-    return None
 
-def _extract_patient_id(text: str) -> str | None:
-    """
-    Attempt to extract a patient_id from tool output text.
-    """
-    match = re.search(r'[\'"]selected_patient_id[\'"]\s*:\s*[\'"]([^\'"]+)[\'"]', text)
-    if match:
-        return match.group(1)
-    return None

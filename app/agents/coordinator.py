@@ -25,10 +25,10 @@ import logging
 from typing import Any, Optional
 
 from langchain_core.messages import SystemMessage
+from pydantic import BaseModel, Field
 
 from app.agents.llm_factory import get_llm
 from app.agents.state import AgentState
-from app.agents.utils import extract_text_content
 from app.prompts import (
     GLOBAL_PROMPT,
     COORDINATOR_PROMPT,
@@ -38,6 +38,11 @@ from app.prompts import (
 
 logger = logging.getLogger(__name__)
 
+
+class CoordinatorOutput(BaseModel):
+    intent: str = Field(description="The routing decision for THIS turn only (booking, faq, escalation).")
+    flow: Optional[str] = Field(None, description="The durable multi-turn task (booking, faq, or null).")
+    conversation_summary: Optional[str] = Field(None, description="A single-paragraph rolling summary.")
 
 def coordinator_node(state: AgentState) -> dict[str, Any]:
     """
@@ -56,6 +61,7 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     logger.info("[Coordinator] Classifying intent...")
 
     llm = get_llm(temperature=0.0)
+    structured_llm = llm.with_structured_output(CoordinatorOutput)
 
     # Build prompt variables, injecting the active flow + summary context
     prompt_vars = get_prompt_variables()
@@ -65,14 +71,18 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     final_prompt = render_prompt(raw_prompt, **prompt_vars)
     messages = [SystemMessage(content=final_prompt)] + list(state["messages"])
 
-    response = llm.invoke(messages)
-    raw_content = extract_text_content(response).strip()
+    response = structured_llm.invoke(messages)
 
-    logger.info(f"[Coordinator] LLM raw response: {raw_content!r}")
+    intent = response.intent.lower().strip() if response.intent else "escalation"
+    if intent not in {"booking", "faq", "escalation"}:
+        intent = "escalation"
 
-    intent, flow, conversation_summary_update = _parse_coordinator_response(
-        raw_content, current_flow=state.get("flow")
-    )
+    flow = response.flow.lower().strip() if response.flow else None
+    if flow not in {"booking", "faq"}:
+        flow = state.get("flow")
+
+    conversation_summary_update = response.conversation_summary.strip() if response.conversation_summary and response.conversation_summary.strip() else None
+
     logger.info(f"[Coordinator] Resolved intent={intent!r}, flow={flow!r}")
 
     updates: dict[str, Any] = {"intent": intent, "flow": flow}
@@ -110,61 +120,7 @@ def _build_active_mode_context(state: AgentState) -> str:
     return context
 
 
-def _parse_coordinator_response(
-    raw: str, current_flow: Optional[str]
-) -> tuple[str, Optional[str], Optional[str]]:
-    """
-    Parses the coordinator LLM's JSON response into (intent, flow, conversation_summary_update).
 
-    - intent: always resolved to a valid value ("booking" | "faq" | "escalation"),
-      falling back to "escalation" on any parse failure or invalid value.
-    - flow: resolved from the response's "flow" key. If the key is missing or its
-      value is invalid, the previous `current_flow` is preserved unchanged. An
-      explicit JSON `null` clears it. Valid values: "booking" | "faq" | None.
-    - conversation_summary_update: the new summary paragraph if the LLM decided to
-      rewrite it (a non-empty string), or None if it should be left unchanged
-      (the LLM returned null/omitted the key, or parsing failed). Callers must
-      treat None as "no update" and OMIT conversation_summary from the returned
-      state dict entirely — never overwrite the existing summary with None.
-    """
-    valid_intents = {"booking", "faq", "escalation"}
-    valid_flows = {"booking", "faq"}
-
-    try:
-        # Strip markdown code fences if the model wrapped the JSON
-        cleaned = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
-        data = json.loads(cleaned)
-    except (json.JSONDecodeError, AttributeError) as e:
-        logger.error(f"[Coordinator] Failed to parse JSON response: {e}. Falling back to 'escalation'.")
-        return "escalation", current_flow, None
-
-    # --- intent (required, always resolved) ---
-    intent = str(data.get("intent", "")).lower().strip()
-    if intent not in valid_intents:
-        logger.warning(
-            f"[Coordinator] Unexpected intent value: {intent!r}. Falling back to 'escalation'."
-        )
-        intent = "escalation"
-
-    # --- flow (optional; missing/invalid preserves current value) ---
-    if "flow" not in data:
-        flow = current_flow
-    else:
-        raw_flow = data["flow"]
-        if raw_flow is None:
-            flow = None
-        else:
-            candidate = str(raw_flow).lower().strip()
-            flow = candidate if candidate in valid_flows else current_flow
-
-    # --- conversation_summary (optional; missing/null/empty means "no update") ---
-    raw_summary = data.get("conversation_summary")
-    if isinstance(raw_summary, str) and raw_summary.strip():
-        conversation_summary_update = raw_summary.strip()
-    else:
-        conversation_summary_update = None
-
-    return intent, flow, conversation_summary_update
 
 
 def route_after_coordinator(state: AgentState) -> str:
