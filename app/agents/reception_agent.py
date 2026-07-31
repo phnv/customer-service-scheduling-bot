@@ -29,7 +29,6 @@ from app.prompts import (
 from app.tools.customer_tools import (
     find_contact_tool,
     create_contact_tool,
-    update_contact_tool,
     find_patient_tool,
     create_patient_tool,
     select_patient_tool,
@@ -52,7 +51,6 @@ def _get_reception_agent():
             tools=[
                 find_contact_tool,
                 create_contact_tool,
-                update_contact_tool,
                 find_patient_tool,
                 create_patient_tool,
                 select_patient_tool,
@@ -102,7 +100,7 @@ def reception_node(state: AgentState) -> dict[str, Any]:
             if msg.name == "create_contact_tool" and isinstance(data, str) and not contact_id:
                 contact_id = data
                 logger.info(f"[Reception] Extracted contact_id from create_contact_tool: {contact_id}")
-            elif msg.name in ["find_contact_tool", "update_contact_tool"] and isinstance(data, dict):
+            elif msg.name == "find_contact_tool" and isinstance(data, dict):
                 extracted = data.get("contact_id")
                 if extracted and not contact_id:
                     contact_id = str(extracted)

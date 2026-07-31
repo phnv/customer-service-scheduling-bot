@@ -23,6 +23,7 @@ import os
 import uuid
 from typing import Any
 
+import mlflow
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
@@ -39,6 +40,14 @@ from app.prompts import ESCALATION_MESSAGE
 logger = logging.getLogger(__name__)
 
 load_dotenv()
+
+# ---------------------------------------------------------------------------
+# MLflow — activate LangChain/LangGraph autologging once at module load.
+# This captures agent routing, model inputs/outputs, and tool spans for every
+# run_agent() invocation. No manual trace serialization is required.
+# ---------------------------------------------------------------------------
+mlflow.langchain.autolog()
+
 
 # ---------------------------------------------------------------------------
 # Escalation Node (static gateway — not a ReAct agent)
@@ -121,6 +130,13 @@ def _build_graph() -> Any:
 
 # Singleton compiled graph — built once, reused across all run_agent calls
 _graph = _build_graph()
+# ---------------------------------------------------------------------------
+# MLflow Models from Code
+# ---------------------------------------------------------------------------
+# When registering this graph as a model-from-code (via lc_model=str(GRAPH_PATH)),
+# MLflow executes this file and expects us to set the model instance using set_model().
+import mlflow.models
+mlflow.models.set_model(_graph)
 
 
 # ---------------------------------------------------------------------------
@@ -188,3 +204,4 @@ def _extract_last_ai_message(state: dict[str, Any]) -> str:
         "I'm sorry, I encountered an issue processing your request. "
         "Please try again or contact our reception directly."
     )
+

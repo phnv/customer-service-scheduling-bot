@@ -1,6 +1,9 @@
 import logging
 from typing import Optional, List
 from datetime import date
+
+import mlflow
+from mlflow.entities import SpanType
 from langchain_core.tools import tool
 from sqlmodel import Session
 from app.database.engine import engine
@@ -10,6 +13,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def check_availability_tool(specialty: Optional[str] = None, start_date: Optional[str] = None) -> List[dict]:
     """Finds available appointment slots. start_date should be YYYY-MM-DD."""
     logger.info(f"Tool 'check_availability_tool' called with payload: specialty={specialty}, start_date={start_date}")
@@ -21,6 +25,7 @@ def check_availability_tool(specialty: Optional[str] = None, start_date: Optiona
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def reserve_slot_tool(slot_id: str, conversation_id: str) -> dict:
     """Reserves an availability slot and returns a reservation_id."""
     logger.info(f"Tool 'reserve_slot_tool' called with payload: slot_id={slot_id}, conversation_id={conversation_id}")
@@ -31,6 +36,7 @@ def reserve_slot_tool(slot_id: str, conversation_id: str) -> dict:
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def cancel_reservation_tool(reservation_id: str) -> dict:
     """Cancels a reservation and frees the slot."""
     logger.info(f"Tool 'cancel_reservation_tool' called with payload: reservation_id={reservation_id}")
@@ -41,6 +47,7 @@ def cancel_reservation_tool(reservation_id: str) -> dict:
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def create_appointment_tool(reservation_id: str, patient_id: str, contact_id: str) -> dict:
     """Creates an appointment from an active reservation."""
     logger.info(f"Tool 'create_appointment_tool' called with payload: reservation_id={reservation_id}, patient_id={patient_id}, contact_id={contact_id}")
@@ -51,6 +58,7 @@ def create_appointment_tool(reservation_id: str, patient_id: str, contact_id: st
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def cancel_appointment_tool(appointment_id: str) -> dict:
     """Cancels an existing appointment."""
     logger.info(f"Tool 'cancel_appointment_tool' called with payload: appointment_id={appointment_id}")
@@ -61,6 +69,7 @@ def cancel_appointment_tool(appointment_id: str) -> dict:
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def reschedule_appointment_tool(appointment_id: str, new_slot_id: str) -> dict:
     """Reschedules an appointment to a new slot."""
     logger.info(f"Tool 'reschedule_appointment_tool' called with payload: appointment_id={appointment_id}, new_slot_id={new_slot_id}")

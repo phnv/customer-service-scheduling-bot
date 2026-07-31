@@ -172,3 +172,23 @@ The `ChatViewModel` translates the internal `AgentState` (including UI flags) in
 - **Modularity** — low coupling, high cohesion
 - **No external APIs** — all integrations are mocked in the Service layer
 - **Logging** — use `logging.getLogger(__name__)` in every module
+- **complete separation of concerns between Mlflow and LangGraph** -  Mlflow is for evaluation and LangGraph is the application
+
+### Code Quality Rules
+- Never write compatibility code.
+- Never write temporary wrappers.
+- Never write workaround parsers.
+- Ask before adding adapters.
+
+---
+
+## 10. MLflow and LLMOps Guidelines
+For all MLflow GenAI LLMOps implementation patterns and best practices, rely on the `mlflow-agent` instructions. 
+- Always inform the user before implementing something that is not backed by official mlflow  skills or documentation
+- You may access https://mlflow.org/docs/ for technical  references
+- Never build workarounds around MLflow; use its intended design.
+
+### MLflow Registry Artifacts
+When interacting with registered models or prompts:
+- All models and prompts must be explicitly tracked using the MLflow Model Registry and MLflow Prompt Registry.
+- Avoid using hardcoded integer versions in execution code. Use and update aliases (e.g., `@champion` or `@production`) to fetch the correct artifacts at runtime. Use `scripts/manage_aliases.py` to maintain these aliases with zero downtime.

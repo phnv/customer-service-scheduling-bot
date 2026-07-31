@@ -1,5 +1,8 @@
 import logging
 from typing import Annotated
+
+import mlflow
+from mlflow.entities import SpanType
 from langchain_core.messages import ToolMessage
 from langchain_core.tools import tool
 from langchain_core.tools.base import InjectedToolCallId
@@ -8,6 +11,7 @@ from app.services.faq_service import FAQService
 logger = logging.getLogger(__name__)
 _faq_service = FAQService()
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def search_faq_tool(
     query: str,
     tool_call_id: Annotated[str, InjectedToolCallId],

@@ -1,5 +1,8 @@
 import logging
 from typing import Optional, Dict, Any
+
+import mlflow
+from mlflow.entities import SpanType
 from langchain_core.tools import tool
 from sqlmodel import Session
 from app.database.engine import engine
@@ -8,6 +11,7 @@ from app.services.qualification_service import QualificationService
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+@mlflow.trace(span_type=SpanType.TOOL)
 @tool
 def get_lead_tool(conversation_id: str) -> Optional[dict]:
     """Gets lead qualification data for a conversation."""
@@ -18,6 +22,7 @@ def get_lead_tool(conversation_id: str) -> Optional[dict]:
         logger.info(f"Tool 'get_lead_tool' output: {result}")
         return result
 
+@mlflow.trace(span_type=SpanType.TOOL)
 @tool
 def update_lead_tool(conversation_id: str, fields: Dict[str, Any]) -> dict:
     """Updates or inserts lead qualification fields."""

@@ -1,0 +1,7 @@
+{
+  "coordinator-prompt": "prompts:/coordinator-prompt/1",
+  "reception-prompt": "prompts:/reception-prompt/1",
+  "booking-prompt": "prompts:/booking-prompt/1",
+  "faq-prompt": "prompts:/faq-prompt/1",
+  "escalation-prompt": "prompts:/escalation-prompt/1"
+}

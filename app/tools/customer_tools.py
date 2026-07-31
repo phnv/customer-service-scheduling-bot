@@ -1,6 +1,9 @@
 import logging
 from typing import Optional, Dict, Any, List
 from datetime import date
+
+import mlflow
+from mlflow.entities import SpanType
 from langchain_core.tools import tool
 from sqlmodel import Session
 from app.database.engine import engine
@@ -10,6 +13,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def find_contact_tool(phone: Optional[str] = None, document: Optional[str] = None, email: Optional[str] = None) -> Optional[dict]:
     """Finds a contact by their phone number, document, or email."""
     logger.info(f"Tool 'find_contact_tool' called with payload: phone={phone}, document={document}, email={email}")
@@ -20,6 +24,7 @@ def find_contact_tool(phone: Optional[str] = None, document: Optional[str] = Non
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def create_contact_tool(full_name: str, phone: str, document: Optional[str] = None, email: Optional[str] = None, birthdate: Optional[str] = None) -> str:
     """Creates a new contact in the system. Birthdate should be in YYYY-MM-DD format."""
     logger.info(f"Tool 'create_contact_tool' called with payload: full_name={full_name}, phone={phone}, document={document}, email={email}, birthdate={birthdate}")
@@ -33,6 +38,7 @@ def create_contact_tool(full_name: str, phone: str, document: Optional[str] = No
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def update_contact_tool(contact_id: str, fields: Dict[str, Any]) -> Optional[dict]:
     """Updates an existing contact with the provided fields."""
     logger.info(f"Tool 'update_contact_tool' called with payload: contact_id={contact_id}, fields={fields}")
@@ -43,6 +49,7 @@ def update_contact_tool(contact_id: str, fields: Dict[str, Any]) -> Optional[dic
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def find_patient_tool(contact_id: Optional[str] = None, patient_name: Optional[str] = None) -> List[dict]:
     """Finds patients by contact_id or patient_name."""
     logger.info(f"Tool 'find_patient_tool' called with payload: contact_id={contact_id}, patient_name={patient_name}")
@@ -53,6 +60,7 @@ def find_patient_tool(contact_id: Optional[str] = None, patient_name: Optional[s
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def create_patient_tool(contact_id: str, full_name: str, relationship: str, birthdate: Optional[str] = None) -> str:
     """Creates a new patient in the system. Birthdate should be in YYYY-MM-DD format."""
     logger.info(f"Tool 'create_patient_tool' called with payload: contact_id={contact_id}, full_name={full_name}, relationship={relationship}, birthdate={birthdate}")
@@ -66,6 +74,7 @@ def create_patient_tool(contact_id: str, full_name: str, relationship: str, birt
         return result
 
 @tool
+@mlflow.trace(span_type=SpanType.TOOL)
 def select_patient_tool(patient_id: str) -> dict:
     """Selects the patient for the upcoming appointment scheduling. MUST be called to lock in the patient."""
     logger.info(f"Tool 'select_patient_tool' called with payload: patient_id={patient_id}")
