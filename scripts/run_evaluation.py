@@ -30,12 +30,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import mlflow
-from mlflow.genai.scorers import (
-    Correctness,
-    RelevanceToQuery,
-    ToolCallCorrectness,
-    ToolCallEfficiency,
-)
+from scorers import get_sanity_scorers, get_full_scorers
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -80,17 +75,12 @@ _dataset_cfg = _load_dataset_config()
 DATASET_CONFIGS: dict[str, dict[str, Any]] = {
     "sanity": {
         "name": _dataset_cfg["datasets"]["sanity"]["name"],
-        "scorers": [Correctness()],
+        "scorers": get_sanity_scorers(),
         "description": _dataset_cfg["datasets"]["sanity"]["description"],
     },
     "full": {
         "name": _dataset_cfg["datasets"]["full"]["name"],
-        "scorers": [
-            Correctness(),
-            RelevanceToQuery(),
-            ToolCallCorrectness(),
-            ToolCallEfficiency(),
-        ],
+        "scorers": get_full_scorers(),
         "description": _dataset_cfg["datasets"]["full"]["description"],
     },
 }

@@ -18,12 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import mlflow
-from mlflow.genai.scorers import (
-    Correctness,
-    RelevanceToQuery,
-    ToolCallCorrectness,
-    ToolCallEfficiency,
-)
+from scorers import get_full_scorers
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -47,12 +42,7 @@ mlflow.set_experiment(experiment_name)
 #   - ToolCallCorrectness: Did the agent call the right tools with the right args?
 #   - ToolCallEfficiency:  Did the agent avoid redundant/duplicate tool calls?
 # ---------------------------------------------------------------------------
-SCORERS = [
-    Correctness(),
-    RelevanceToQuery(),
-    ToolCallCorrectness(),
-    ToolCallEfficiency(),
-]
+SCORERS = get_full_scorers()
 
 
 def main() -> None:
