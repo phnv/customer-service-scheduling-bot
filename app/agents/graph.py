@@ -140,19 +140,70 @@ mlflow.models.set_model(_graph)
 
 
 # ---------------------------------------------------------------------------
+# History conversion helper
+# ---------------------------------------------------------------------------
+
+def _convert_history(history: list[dict]) -> list[AIMessage | HumanMessage]:
+    """Convert dataset conversation_history dicts to LangChain message objects.
+
+    Strict role mapping (per grilling session decision):
+        role == 'user'      → HumanMessage
+        role == 'assistant' → AIMessage
+        anything else       → ValueError  (fail fast on bad dataset data)
+
+    Args:
+        history: List of {"role": str, "content": str} dicts from the
+                 evaluation dataset's conversation_history field.
+
+    Returns:
+        Ordered list of HumanMessage / AIMessage objects ready to be
+        prepended to initial_state["messages"] before graph.invoke().
+
+    Raises:
+        ValueError: if a turn has an unrecognised role or is malformed.
+    """
+    messages: list[AIMessage | HumanMessage] = []
+    for i, turn in enumerate(history):
+        role = turn.get("role")
+        content = turn.get("content", "")
+        if role == "user":
+            messages.append(HumanMessage(content=content))
+        elif role == "assistant":
+            messages.append(AIMessage(content=content))
+        else:
+            raise ValueError(
+                f"Unrecognised role {role!r} at conversation_history[{i}]. "
+                "Expected 'user' or 'assistant'."
+            )
+    return messages
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
-def run_agent(user_message: str, conversation_id: str | None = None) -> tuple[str, dict[str, Any]]:
+def run_agent(
+    user_message: str,
+    conversation_id: str | None = None,
+    conversation_history: list[dict] | None = None,
+) -> tuple[str, dict[str, Any]]:
     """
     Process a user message through the multi-agent pipeline and return the response and state.
 
-    This is the single entry point called by the Streamlit UI (via ChatApplication).
+    This is the single entry point called by the Streamlit UI (via ChatApplication)
+    and by the MLflow evaluation predict_fn.
 
     Args:
         user_message: The raw text sent by the user.
         conversation_id: Stable ID linking this message to a conversation session.
                          If None, a new UUID is generated (single-turn usage).
+        conversation_history: Prior turns as a list of {"role", "content"} dicts,
+                              sourced from the MLflow evaluation dataset. When
+                              provided, turns are converted to LangChain message
+                              objects and prepended to the graph's initial state so
+                              the agent sees full prior context on the single
+                              graph.invoke() call. Defaults to None (no prior
+                              history — normal production / Streamlit usage).
 
     Returns:
         A tuple of (agent_response_string, final_agent_state_dict).
@@ -171,8 +222,13 @@ def run_agent(user_message: str, conversation_id: str | None = None) -> tuple[st
     # LangGraph config: thread_id enables MemorySaver to restore prior state
     config = {"configurable": {"thread_id": conversation_id}}
 
+    # Build prior context from evaluation history (empty for live UI calls).
+    # _convert_history() raises ValueError on unrecognised roles — intentional:
+    # bad dataset data should fail loudly, not silently produce wrong results.
+    prior_messages = _convert_history(conversation_history) if conversation_history else []
+
     initial_state: dict[str, Any] = {
-        "messages": [HumanMessage(content=user_message)],
+        "messages": [*prior_messages, HumanMessage(content=user_message)],
         "conversation_id": conversation_id,
     }
 

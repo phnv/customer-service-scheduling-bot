@@ -30,8 +30,10 @@ Versioning:
 """
 
 import argparse
+import json
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -44,7 +46,9 @@ from mlflow.genai.datasets import create_dataset, get_dataset
 # Dataset versioning
 # ---------------------------------------------------------------------------
 # v1 = initial schema for the clean MLflow re-implementation (Milestone 10).
-DATASET_VERSION = "v1"
+DATASET_VERSION = "v2" # 1st round of fixes + conversation history
+DATASET_NAME = "prompt-eval-v2"
+SANITY_DATASET_NAME = "sanity-check-5q-v2"
 
 tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
@@ -84,6 +88,9 @@ SANITY_RECORDS = [
         },
         "tags": {"agent_under_test": "reception"},
     },
+
+    # Conversation history not being inputed 
+    # - also should not test this here bcause envolves tool_calling
     {
         "inputs": {
             "user_message": "Do you have anything next Tuesday with a cardiologist?",
@@ -107,11 +114,14 @@ SANITY_RECORDS = [
         "expectations": {
             "expected_facts": [
                 "The agent provides the clinic's lateness or cancellation policy.",
-                "The agent does not provide medical advice.",
+                # "Agent must complement with Cancellation Policy: Appointments must be cancelled at least 24 hours in advance to avoid a cancellation fee. Same-day cancellations may incur a fee of up to 50% of the consultation price",
             ],
         },
         "tags": {"agent_under_test": "faq"},
     },
+
+
+    # maybe NOT FIt for correctness scorer (escalation is right , escalation message must be improved)
     {
         "inputs": {
             "user_message": "This is ridiculous! I've been waiting for 3 hours. Let me speak to a manager right now!",
@@ -119,7 +129,9 @@ SANITY_RECORDS = [
         },
         "expectations": {
             "expected_facts": [
-                "The agent routes to escalation or connects the user with a human agent.",
+                "The agent recognizes the user's frustration and stops trying to solve the issue automatically.",
+                "The agent informs the user that the issue has been escalated to a human team.",
+                "Chat session ends, no more messages from agent."
             ],
         },
         "tags": {"agent_under_test": "coordinator"},
@@ -785,6 +797,31 @@ def _attach_version_tag(records: list[dict]) -> list[dict]:
     return tagged
 
 
+def _write_dataset_config() -> None:
+    """Write scripts/dataset_config.json with current dataset names and version.
+
+    Called at the end of every successful dataset creation run so that
+    run_evaluation.py always reads the authoritative names from a single
+    JSON file rather than hardcoding them.
+    """
+    config = {
+        "version": DATASET_VERSION,
+        "datasets": {
+            "sanity": {
+                "name": SANITY_DATASET_NAME,
+                "description": "5-record sanity check \u2014 Correctness scorer only",
+            },
+            "full": {
+                "name": DATASET_NAME,
+                "description": "50-record full evaluation \u2014 all 4 scorers",
+            },
+        },
+    }
+    config_path = Path(__file__).parent / "dataset_config.json"
+    config_path.write_text(json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"  dataset_config.json updated → {config_path}")
+
+
 def generate_dataset(name: str, records: list[dict], purge: bool = False) -> None:
     """Create or update a single named MLflow evaluation dataset."""
     records = _attach_version_tag(records)
@@ -837,8 +874,9 @@ if __name__ == "__main__":
     print(f"  version : {DATASET_VERSION}")
     print(f"  purge   : {args.purge}")
     print("=" * 60)
-    generate_dataset("sanity-check-5q", SANITY_RECORDS, purge=args.purge)
-    generate_dataset("prompt-eval-v1", FULL_RECORDS, purge=args.purge)
+    generate_dataset(SANITY_DATASET_NAME, SANITY_RECORDS, purge=args.purge)
+    generate_dataset(DATASET_NAME, FULL_RECORDS, purge=args.purge)
+    _write_dataset_config()
     print("=" * 60)
     print("Done. Run manually and verify in MLflow UI.")
     print("=" * 60)

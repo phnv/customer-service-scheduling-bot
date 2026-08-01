@@ -2,8 +2,12 @@
 Run MLflow evaluation against pre-seeded datasets.
 
 Two modes:
-  --dataset sanity  → loads 'sanity-check-5q'  (5 records, Correctness only)
-  --dataset full    → loads 'prompt-eval-v1'    (50 records, all 4 scorers)
+  --dataset sanity  → loads the sanity dataset (5 records, Correctness only)
+  --dataset full    → loads the full dataset   (50 records, all 4 scorers)
+
+Dataset names are read from scripts/dataset_config.json, which is written by
+create_datasets.py on every successful run. Bump the name constants there and
+re-run create_datasets.py — this script picks up the change automatically.
 
 The predict_fn wraps run_agent(), mapping the dataset inputs schema
 (user_message + conversation_history) to the agent's entry point.
@@ -14,9 +18,11 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import sys
 import uuid
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
@@ -46,23 +52,46 @@ mlflow.set_tracking_uri(tracking_uri)
 mlflow.set_experiment(experiment_name)
 
 # ---------------------------------------------------------------------------
+# Dataset name config — loaded from scripts/dataset_config.json
+# (written by create_datasets.py on every successful run)
+# ---------------------------------------------------------------------------
+def _load_dataset_config() -> dict:
+    """Load dataset_config.json from the scripts/ directory.
+
+    Raises SystemExit with a clear message if the file is missing so the
+    operator knows to run create_datasets.py first.
+    """
+    config_path = Path(__file__).parent / "dataset_config.json"
+    if not config_path.exists():
+        print(
+            f"ERROR: {config_path} not found.\n"
+            "Run 'uv run python scripts/create_datasets.py' to create it."
+        )
+        sys.exit(1)
+    with config_path.open(encoding="utf-8") as f:
+        return json.load(f)
+
+
+_dataset_cfg = _load_dataset_config()
+
+# ---------------------------------------------------------------------------
 # Dataset configurations
 # ---------------------------------------------------------------------------
 DATASET_CONFIGS: dict[str, dict[str, Any]] = {
     "sanity": {
-        "name": "sanity-check-5q",
+        "name": _dataset_cfg["datasets"]["sanity"]["name"],
         "scorers": [Correctness()],
-        "description": "5-record sanity check — Correctness scorer only",
+        "description": _dataset_cfg["datasets"]["sanity"]["description"],
     },
     "full": {
-        "name": "prompt-eval-v1",
+        "name": _dataset_cfg["datasets"]["full"]["name"],
         "scorers": [
             Correctness(),
             RelevanceToQuery(),
             ToolCallCorrectness(),
             ToolCallEfficiency(),
         ],
-        "description": "50-record full evaluation — all 4 scorers",
+        "description": _dataset_cfg["datasets"]["full"]["description"],
     },
 }
 
@@ -92,17 +121,20 @@ def _get_predict_fn():
     def predict_fn(user_message: str, conversation_history: list | None = None) -> str:
         """Wrap run_agent() for mlflow.genai.evaluate().
 
-        Each evaluation record gets a unique ephemeral conversation_id so
-        that prior state from other records does not bleed across runs.
+        MLflow passes dataset inputs as **kwargs — parameter names here must match
+        the dataset record input keys exactly (user_message, conversation_history).
+        See: https://mlflow.org/docs/latest/genai/eval-monitor/running-evaluation/eval-examples.md
+
+        Each evaluation record gets a unique ephemeral conversation_id so that
+        MemorySaver state from other records does not bleed across runs.
+        conversation_history is injected into initial_state directly by run_agent()
+        so the agent sees full prior context on the single graph.invoke() call.
         """
         conversation_id = f"eval-{uuid.uuid4()}"
-        # Prepend conversation_history as context if provided.
-        # run_agent() accepts the user's message for the current turn;
-        # history is currently carried in state via MemorySaver, so each
-        # eval record starts fresh with its own conversation_id.
         response, _ = run_agent(
             user_message=user_message,
             conversation_id=conversation_id,
+            conversation_history=conversation_history,
         )
         return response
 
