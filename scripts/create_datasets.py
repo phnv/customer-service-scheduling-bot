@@ -75,7 +75,7 @@ SANITY_RECORDS = [
             ],
             "expected_intention": ["booking"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "sanity_001"},
     },
     {
         "inputs": {
@@ -88,7 +88,7 @@ SANITY_RECORDS = [
             ],
             "expected_intention": ["reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "sanity_002"},
     },
 
     # Conversation history not being inputed 
@@ -107,7 +107,7 @@ SANITY_RECORDS = [
             ],
             "expected_intention": ["booking"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "sanity_003"},
     },
     {
         "inputs": {
@@ -121,7 +121,7 @@ SANITY_RECORDS = [
             ],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "sanity_004"},
     },
 
 
@@ -139,7 +139,7 @@ SANITY_RECORDS = [
             ],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "sanity_005"},
     },
 ]
 
@@ -162,7 +162,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent initiates the booking process and asks for the user's contact information."],
             "expected_intention": ["booking"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_001"},
     },
     {
         "inputs": {
@@ -173,7 +173,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent provides the clinic's operating hours."],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_002"},
     },
     {
         "inputs": {
@@ -184,7 +184,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent apologizes and transfers the conversation to a human representative."],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_003"},
     },
     {
         "inputs": {
@@ -200,7 +200,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent continues the booking flow for the selected specialty."],
             "expected_intention": ["booking"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_004"},
     },
 
     # ~Duplicated - similar one on reception
@@ -217,7 +217,7 @@ FULL_RECORDS = [
             "expected_intention": ["faq"],
             "expected_tool_calls": [{"name": "search_services_tool"}],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_005"},
     },
     {
         "inputs": {
@@ -228,7 +228,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent asks for the user's contact information to locate and cancel the appointment."],
             "expected_intention": ["booking"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_006"},
     },
 
     # Duplicated row : similar on reception agent 
@@ -244,7 +244,7 @@ FULL_RECORDS = [
             "expected_facts": ["Human takes over because data correction is not self-service."],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_007"},
     },
     {
         "inputs": {
@@ -255,7 +255,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent informs the user that this request requires human assistance and transfers them."],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_008"},
     },
     {
         "inputs": {
@@ -266,7 +266,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent informs the user that changing physicians requires a human representative and initiates a transfer."],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_009"},
     },
     {
         "inputs": {
@@ -277,7 +277,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent provides information about doctors specializing in back pain or advises that it cannot provide medical recommendations."],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_010"},
     },
     {
         "inputs": {
@@ -288,7 +288,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent answers the question about online payments."],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_011"},
     },
     {
         "inputs": {
@@ -299,7 +299,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent provides the clinic's address and location details."],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_012"},
     },
     {
         "inputs": {
@@ -310,7 +310,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent informs the user that a human representative is required for prescription issues and transfers them."],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_013"},
     },
     {
         "inputs": {
@@ -321,7 +321,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent provides information on whether telehealth services are available."],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_014"},
     },
     {
         "inputs": {
@@ -332,7 +332,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent apologizes and transfers the user to a human representative for complaints."],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_015"},
     },
     {
         "inputs": {
@@ -343,7 +343,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent provides information about the parking situation at the clinic."],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "coordinator"},
+        "tags": {"agent_under_test": "coordinator", "index": "full_016"},
     },
 
     # ------------------------------------------------------------------
@@ -358,7 +358,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent proactively asks for contact information such as name and phone or email."],
             "expected_intention": ["booking"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_017"},
     },
     {
         "inputs": {
@@ -373,7 +373,7 @@ FULL_RECORDS = [
             "expected_intention": ["booking"],
             "expected_tool_calls": [{"name": "find_contact_tool"}],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_018"},
     },
     {
         "inputs": {
@@ -391,7 +391,7 @@ FULL_RECORDS = [
             "expected_intention": ["booking","reception"],
             "expected_tool_calls": [{"name": "find_contact_tool"}],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_019"},
     },
     {
         "inputs": {
@@ -406,7 +406,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "select_patient_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_020"},
     },
     {
         "inputs": {
@@ -423,7 +423,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "select_patient_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_021"},
     },
     {
         "inputs": {
@@ -440,7 +440,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_022"},
     },
     {
         "inputs": {
@@ -451,7 +451,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent proactively asks for contact identification."],
             "expected_intention": ["reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_023"},
     },
     {
         "inputs": {
@@ -463,7 +463,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [],
             "expected_intention": ["reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_024"},
     },
     {
         "inputs": {
@@ -478,7 +478,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "find_contact_tool"}],
             "expected_intention": ["reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_025"},
     },
 
     # useless edge case? reevaluate this row
@@ -494,7 +494,7 @@ FULL_RECORDS = [
             "expected_facts": ["The agent asks for an email address or another identifier to look up the contact."],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_026"},
     },
     {
         "inputs": {
@@ -509,7 +509,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "select_patient_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_027"},
     },
 
     # useless edge case? reevaluate this row
@@ -528,7 +528,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["escalation"],
         },
-        "tags": {"agent_under_test": "reception"},
+        "tags": {"agent_under_test": "reception", "index": "full_028"},
     },
 
     # ------------------------------------------------------------------
@@ -547,7 +547,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "check_availability_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_029"},
     },
     {
         "inputs": {
@@ -565,7 +565,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_030"},
     },
 
     # weird conversation, needs better wording 
@@ -582,7 +582,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "reserve_slot_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_031"},
     },
     {
         "inputs": {
@@ -597,7 +597,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "cancel_appointment_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_032"},
     },
     {
         "inputs": {
@@ -612,7 +612,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "reschedule_appointment_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_033"},
     },
     {
         "inputs": {
@@ -627,7 +627,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "check_availability_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_034"},
     },
     {
         "inputs": {
@@ -644,7 +644,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_035"},
     },
     {
         "inputs": {
@@ -659,7 +659,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "check_availability_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_036"},
     },
     {
         "inputs": {
@@ -675,7 +675,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_037"},
     },
     {
         "inputs": {
@@ -690,7 +690,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "reserve_slot_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_038"},
     },
     {
         "inputs": {
@@ -705,7 +705,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "cancel_appointment_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_039"},
     },
     {
         "inputs": {
@@ -720,7 +720,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "reschedule_appointment_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_040"},
     },
     {
         "inputs": {
@@ -737,7 +737,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "booking"},
+        "tags": {"agent_under_test": "booking", "index": "full_041"},
     },
 
     # ------------------------------------------------------------------
@@ -753,7 +753,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "search_faq_tool"}],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_042"},
     },
     {
         "inputs": {
@@ -765,7 +765,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "search_faq_tool"}],
             "expected_intention": ["booking","reception"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_043"},
     },
     {
         "inputs": {
@@ -777,7 +777,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "search_faq_tool"}],
             "expected_intention": ["faq","reception"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_044"},
     },
     #~Duplicated row -  similar one testing coordinator
     {
@@ -793,7 +793,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "search_services_tool"}],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_045"},
     },
     {
         "inputs": {
@@ -807,7 +807,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["booking"]
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_046"},
     },
     {
         "inputs": {
@@ -821,7 +821,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_047"},
     },
     {
         "inputs": {
@@ -833,7 +833,7 @@ FULL_RECORDS = [
             "expected_tool_calls": [{"name": "search_faq_tool"}],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_048"},
     },
     {
         "inputs": {
@@ -847,7 +847,7 @@ FULL_RECORDS = [
             ],
             "expected_intention": ["faq"],
         },
-        "tags": {"agent_under_test": "faq"},
+        "tags": {"agent_under_test": "faq", "index": "full_049"},
     },
 ]
 
