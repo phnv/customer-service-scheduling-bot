@@ -2,8 +2,8 @@
 Create MLflow evaluation datasets for agent evaluation.
 
 Two datasets are created:
-  1. sanity-check-5q  — 5 records, Correctness scorer only (no tool calls).
-  2. prompt-eval-v1   — 50 records, all 4 scorers (Correctness, RelevanceToQuery,
+  1. sanity-check-5q-v3  — 5 records, Correctness scorer only (no tool calls).
+  2. prompt-eval-v3       — 52 records, all 4 scorers (Correctness, RelevanceToQuery,
                         ToolCallCorrectness, ToolCallEfficiency).
 
 Schema (v1):
@@ -46,9 +46,9 @@ from mlflow.genai.datasets import create_dataset, get_dataset
 # Dataset versioning
 # ---------------------------------------------------------------------------
 # v1 = initial schema for the clean MLflow re-implementation (Milestone 10).
-DATASET_VERSION = "v2" # 1st round of fixes + conversation history
-DATASET_NAME = "prompt-eval-v2"
-SANITY_DATASET_NAME = "sanity-check-5q-v2"
+DATASET_VERSION = "v3" # 2nd round of fixes — system event + escalation protocol alignment
+DATASET_NAME = "prompt-eval-v3"
+SANITY_DATASET_NAME = "sanity-check-5q-v3"
 
 tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
@@ -181,7 +181,10 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent apologizes and transfers the conversation to a human representative."],
+            "expected_facts": [
+                "The agent apologizes and transfers the conversation to a human representative.",
+                "Before escalating, the agent asks for the user's name and phone number if not already available.",
+            ],
             "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator", "index": "full_003"},
@@ -241,7 +244,10 @@ FULL_RECORDS = [
             ],
         },
         "expectations": {
-            "expected_facts": ["Human takes over because data correction is not self-service."],
+            "expected_facts": [
+                "Human takes over because data correction is not self-service.",
+                "Before escalating, the agent collects or confirms the user's name and phone number.",
+            ],
             "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator", "index": "full_007"},
@@ -252,7 +258,10 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent informs the user that this request requires human assistance and transfers them."],
+            "expected_facts": [
+                "The agent informs the user that this request requires human assistance and transfers them.",
+                "Before escalating, the agent asks for the user's name and phone number.",
+            ],
             "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator", "index": "full_008"},
@@ -307,7 +316,10 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent informs the user that a human representative is required for prescription issues and transfers them."],
+            "expected_facts": [
+                "The agent informs the user that a human representative is required for prescription issues and transfers them.",
+                "Before escalating, the agent asks for the user's name and phone number.",
+            ],
             "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator", "index": "full_013"},
@@ -329,7 +341,10 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent apologizes and transfers the user to a human representative for complaints."],
+            "expected_facts": [
+                "The agent apologizes and transfers the user to a human representative for complaints.",
+                "Before escalating, the agent apologizes sincerely and asks for the user's name and phone number.",
+            ],
             "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator", "index": "full_015"},
@@ -640,9 +655,11 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": [
                 "The agent acknowledges the confirmed payment.",
+                "The agent presents the appointment details (doctor, date, time).",
+                "The agent asks if the user needs any further help.",
                 "The agent does NOT call any tools in response to the payment event.",
             ],
-            "expected_intention": ["booking","reception"],
+            "expected_intention": ["booking", "reception"],
         },
         "tags": {"agent_under_test": "booking", "index": "full_035"},
     },
@@ -732,10 +749,11 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": [
+                "The agent apologizes sincerely before informing the user about the expiry.",
                 "The agent acknowledges that the payment expired and the reservation was released.",
-                "The agent asks if the user wants to book again.",
+                "The agent proactively offers to search for a new slot, phrased as an open question.",
             ],
-            "expected_intention": ["booking","reception"],
+            "expected_intention": ["booking", "reception"],
         },
         "tags": {"agent_under_test": "booking", "index": "full_041"},
     },
@@ -848,6 +866,47 @@ FULL_RECORDS = [
             "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq", "index": "full_049"},
+    },
+
+    # ------------------------------------------------------------------
+    # ESCALATION PROTOCOL RECORDS (new in v3)
+    # Tests: agent collects name + phone before handing off to human.
+    # ------------------------------------------------------------------
+    {
+        "inputs": {
+            "user_message": "I'm extremely frustrated, I want to speak to someone NOW.",
+            "conversation_history": [
+                {"role": "user", "content": "Hi, I'm trying to cancel my appointment but nothing is working."},
+                {"role": "assistant", "content": "I'm sorry to hear that. Let me look into this for you. Could you share your phone number or name?"},
+            ],
+        },
+        "expectations": {
+            "expected_facts": [
+                "The agent apologizes sincerely for the frustration.",
+                "The agent asks for the user's full name and phone number before escalating.",
+                "The agent adds the contact information and escalation reason to the conversation summary.",
+            ],
+            "expected_intention": ["escalation"],
+        },
+        "tags": {"agent_under_test": "booking", "index": "full_050"},
+    },
+    {
+        "inputs": {
+            "user_message": "I need to update my address in your system.",
+            "conversation_history": [
+                {"role": "user", "content": "Hi, my phone is +15550001234."},
+                {"role": "assistant", "content": "Welcome back, John! How can I help you today?"},
+            ],
+        },
+        "expectations": {
+            "expected_facts": [
+                "The agent does NOT attempt to update data directly.",
+                "The agent explains that address updates require a human representative.",
+                "The agent confirms the user's name and phone number before escalating.",
+            ],
+            "expected_intention": ["escalation"],
+        },
+        "tags": {"agent_under_test": "reception", "index": "full_051"},
     },
 ]
 

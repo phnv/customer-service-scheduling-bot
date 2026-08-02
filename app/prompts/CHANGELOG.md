@@ -4,6 +4,19 @@ All notable changes to the prompts, tool routing, and agent decision logic are d
 
 ---
 
+## [3.1.0] - 2026-08-02 — Milestone 11: Prompt Evaluation Turn #1
+
+### Added
+* **System Event Routing Rule (Coordinator)**: Added an explicit rule to `coordinator.py` (v2.2.0) prepended at the top of `# Decision Rules — intent`: any message matching `[System Event: ...]` is always routed to `intent="booking"`. Two few-shot examples reinforce the rule for Payment Confirmed and Payment Expired events.
+* **Escalation Protocol (Global)**: Added `# Escalation Protocol` section to `global_prompt.py` applying universally to all agents. Before escalating, agents must: (1) apologise sincerely, (2) ask for the user's full name and phone number if not already in context, (3) record contact details and reason in `conversation_summary`, then (4) proceed with the handoff. Includes two few-shot examples (complaint and frustration cases).
+
+### Changed
+* **Payment Confirmed Response (Booking)**: Updated `booking.py` (v2.1.0) — agent now presents full appointment details (doctor, date, time, specialty if available), follows with "Is there anything else I can help you with today?", and wishes the user well if no further help is needed.
+* **Payment Expired Response (Booking)**: Updated `booking.py` — agent now apologises sincerely before delivering the expiry news, then proactively offers to search for a new slot with an open-ended question.
+* **Dataset v2 → v3** (`create_datasets.py`): Bumped `DATASET_VERSION` to `v3` (datasets: `prompt-eval-v3`, `sanity-check-5q-v3`). Updated `expected_facts` in 7 existing records (`full_035`, `full_041`, `full_003`, `full_007`, `full_008`, `full_013`, `full_015`) to reflect new prompt behaviours. Added 2 new escalation-protocol records (`full_050` booking, `full_051` reception). Total: 52 records (was 50).
+
+---
+
 ## [3.0.0] - 2026-07-23 — Milestone 12: Prompt Evaluation #1
 
 ### Added

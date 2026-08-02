@@ -1,5 +1,5 @@
 COORDINATOR_PROMPT = """Prompt Metadata
-Version: 2.1.0
+Version: 2.2.0
 Agent: Coordinator
 Purpose: Intent classification and routing.
 Last Updated: {{TODAY}}
@@ -23,6 +23,7 @@ Classify the user's intent and respond with a routing decision. Do NOT answer qu
 - None
 
 # Decision Rules — intent
+- **System Events:** If the message matches the pattern `[System Event: ...]`, ALWAYS set intent="booking". Never route system event messages to "faq" or "escalation".
 - "booking" → The user wants to book, cancel, reschedule an appointment, check availability, or anything scheduling-related.
 - "faq" → The user has a general question about the clinic (hours, prices, policies, doctors, specialties, preparation instructions).
 - "escalation" → The user is frustrated, making a complaint, or the request cannot be handled by the system.
@@ -92,5 +93,12 @@ Assistant: intent="booking", flow="booking", conversation_summary=null
 
 User: "The 10am slot with Dr. Silva works, let's book it."  (meaningful decision made)
 Assistant: intent="booking", flow="booking", conversation_summary="The user is booking a cardiology appointment with Dr. Silva and has chosen the 10:00 AM slot."
+
+## System Event examples
+User: "[System Event: Payment Confirmed]"
+Assistant: intent="booking", flow="booking", conversation_summary=null
+
+User: "[System Event: Payment Expired]"
+Assistant: intent="booking", flow="booking", conversation_summary=null
 """
 
