@@ -49,3 +49,33 @@ def search_faq_tool(
             ],
         }
     )
+
+@tool
+@mlflow.trace(span_type=SpanType.TOOL)
+def search_services_tool(
+    specialty: str = None,
+    service_type: str = None,
+    service_mode: str = None
+) -> str:
+    """
+    Searches the clinic's services catalogue.
+    Returns information about available services, prices, and the doctors providing them.
+    Can be filtered by specialty, service_type (e.g. initial, return), and service_mode (e.g. online, in_person).
+    Leave parameters empty to get the full catalog.
+    """
+    logger.info(f"Tool 'search_services_tool' called with args: specialty={specialty}, type={service_type}, mode={service_mode}")
+    results = _faq_service.search_services(
+        specialty=specialty,
+        service_type=service_type,
+        service_mode=service_mode
+    )
+    
+    if not results:
+        return "No services found matching the criteria."
+        
+    parts = []
+    for res in results:
+        parts.append(
+            f"- {res['doctor_name']} ({res['specialty']}) | {res['service_type']} / {res['service_mode']} | ${res['price']}"
+        )
+    return "Available Services:\n" + "\n".join(parts)

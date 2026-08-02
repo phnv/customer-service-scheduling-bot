@@ -24,7 +24,7 @@ from app.prompts import (
     get_prompt_variables,
     render_prompt,
 )
-from app.tools.faq_tools import search_faq_tool
+from app.tools.faq_tools import search_faq_tool, search_services_tool
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def _get_faq_agent():
         final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _faq_react_agent = create_react_agent(
             model=get_llm(),
-            tools=[search_faq_tool],
+            tools=[search_faq_tool, search_services_tool],
             prompt=final_prompt,
         )
     return _faq_react_agent
