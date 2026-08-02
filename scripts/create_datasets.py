@@ -71,8 +71,9 @@ SANITY_RECORDS = [
         },
         "expectations": {
             "expected_facts": [
-                "The agent routes to booking intent or asks for contact information.",
+                "The agent asks for contact information.",
             ],
+            "expected_intention": ["booking"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -85,6 +86,7 @@ SANITY_RECORDS = [
             "expected_facts": [
                 "The agent proactively asks for contact information such as name and phone number or email.",
             ],
+            "expected_intention": ["reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -103,6 +105,7 @@ SANITY_RECORDS = [
             "expected_facts": [
                 "The agent checks availability for cardiology on next Tuesday.",
             ],
+            "expected_intention": ["booking"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -116,6 +119,7 @@ SANITY_RECORDS = [
                 "The agent provides the clinic's lateness or cancellation policy.",
                 # "Agent must complement with Cancellation Policy: Appointments must be cancelled at least 24 hours in advance to avoid a cancellation fee. Same-day cancellations may incur a fee of up to 50% of the consultation price",
             ],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -133,6 +137,7 @@ SANITY_RECORDS = [
                 "The agent informs the user that the issue has been escalated to a human team.",
                 "Chat session ends, no more messages from agent."
             ],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -154,7 +159,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to booking intent."],
+            "expected_facts": ["The agent initiates the booking process and asks for the user's contact information."],
+            "expected_intention": ["booking"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -164,7 +170,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent."],
+            "expected_facts": ["The agent provides the clinic's operating hours."],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -174,7 +181,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to escalation intent."],
+            "expected_facts": ["The agent apologizes and transfers the conversation to a human representative."],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -189,10 +197,13 @@ FULL_RECORDS = [
             ],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to booking intent."],
+            "expected_facts": ["The agent continues the booking flow for the selected specialty."],
+            "expected_intention": ["booking"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
+
+    # ~Duplicated - similar one on reception
     {
         "inputs": {
             "user_message": "Actually, how much does a dermatology consultation cost?",
@@ -202,7 +213,9 @@ FULL_RECORDS = [
             ],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent.", "The booking flow is preserved."],
+            "expected_facts": ["The booking flow is preserved."],
+            "expected_intention": ["faq"],
+            "expected_tool_calls": [{"name": "search_services_tool"}],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -212,10 +225,13 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to booking intent."],
+            "expected_facts": ["The agent asks for the user's contact information to locate and cancel the appointment."],
+            "expected_intention": ["booking"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
+
+    # Duplicated row : similar on reception agent 
     {
         "inputs": {
             "user_message": "Actually, my phone number is wrong in your system — it should be 555-0199.",
@@ -225,7 +241,8 @@ FULL_RECORDS = [
             ],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to escalation intent because data correction is not self-service."],
+            "expected_facts": ["Human takes over because data correction is not self-service."],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -235,7 +252,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to escalation intent."],
+            "expected_facts": ["The agent informs the user that this request requires human assistance and transfers them."],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -245,7 +263,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to escalation intent."],
+            "expected_facts": ["The agent informs the user that changing physicians requires a human representative and initiates a transfer."],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -255,7 +274,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent."],
+            "expected_facts": ["The agent provides information about doctors specializing in back pain or advises that it cannot provide medical recommendations."],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -265,7 +285,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent."],
+            "expected_facts": ["The agent answers the question about online payments."],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -275,7 +296,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent."],
+            "expected_facts": ["The agent provides the clinic's address and location details."],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -285,7 +307,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to escalation intent."],
+            "expected_facts": ["The agent informs the user that a human representative is required for prescription issues and transfers them."],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -295,7 +318,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent."],
+            "expected_facts": ["The agent provides information on whether telehealth services are available."],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -305,7 +329,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to escalation intent."],
+            "expected_facts": ["The agent apologizes and transfers the user to a human representative for complaints."],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -315,7 +340,8 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent routes to FAQ intent."],
+            "expected_facts": ["The agent provides information about the parking situation at the clinic."],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "coordinator"},
     },
@@ -330,6 +356,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": ["The agent proactively asks for contact information such as name and phone or email."],
+            "expected_intention": ["booking"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -343,6 +370,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": ["The agent calls the find_contact_tool to look up the contact."],
+            "expected_intention": ["booking"],
             "expected_tool_calls": [{"name": "find_contact_tool"}],
         },
         "tags": {"agent_under_test": "reception"},
@@ -360,6 +388,7 @@ FULL_RECORDS = [
                 "The agent calls find_contact_tool to check if the contact exists.",
                 "If not found, the agent asks for registration details.",
             ],
+            "expected_intention": ["booking","reception"],
             "expected_tool_calls": [{"name": "find_contact_tool"}],
         },
         "tags": {"agent_under_test": "reception"},
@@ -375,6 +404,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls select_patient_tool with Emma's patient_id."],
             "expected_tool_calls": [{"name": "select_patient_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -391,6 +421,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent switches the patient selection to Lucas."],
             "expected_tool_calls": [{"name": "select_patient_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -407,6 +438,7 @@ FULL_RECORDS = [
                 "The agent does NOT call update_contact_tool.",
                 "The agent escalates data corrections to a human agent.",
             ],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -417,6 +449,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": ["The agent proactively asks for contact identification."],
+            "expected_intention": ["reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -427,6 +460,8 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": ["The agent asks for alternative identifiers such as full name and phone or email."],
+            "expected_tool_calls": [],
+            "expected_intention": ["reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -441,9 +476,12 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls find_contact_tool with the provided phone number."],
             "expected_tool_calls": [{"name": "find_contact_tool"}],
+            "expected_intention": ["reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
+
+    # useless edge case? reevaluate this row
     {
         "inputs": {
             "user_message": "I don't have a phone number.",
@@ -454,6 +492,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": ["The agent asks for an email address or another identifier to look up the contact."],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -468,9 +507,12 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls select_patient_tool with Michael's patient_id."],
             "expected_tool_calls": [{"name": "select_patient_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "reception"},
     },
+
+    # useless edge case? reevaluate this row
     {
         "inputs": {
             "user_message": "Wait, I need to update my email address.",
@@ -484,6 +526,7 @@ FULL_RECORDS = [
                 "The agent escalates to a human agent.",
                 "Self-service data corrections are not allowed.",
             ],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "reception"},
     },
@@ -502,11 +545,13 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls check_availability_tool for cardiology on next Tuesday."],
             "expected_tool_calls": [{"name": "check_availability_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
     {
         "inputs": {
+            # Must enhance conversation history with contact info
             "user_message": "The 10am slot with Dr. Silva works.",
             "conversation_history": [
                 {"role": "user", "content": "Do you have anything next Tuesday with a cardiologist?"},
@@ -518,9 +563,12 @@ FULL_RECORDS = [
                 "The agent asks for explicit user confirmation before calling reserve_slot_tool.",
                 "The agent does NOT reserve the slot without confirmation.",
             ],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
+
+    # weird conversation, needs better wording 
     {
         "inputs": {
             "user_message": "Yes, please book it.",
@@ -532,6 +580,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls reserve_slot_tool to confirm the booking."],
             "expected_tool_calls": [{"name": "reserve_slot_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -546,6 +595,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls cancel_appointment_tool."],
             "expected_tool_calls": [{"name": "cancel_appointment_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -560,6 +610,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls reschedule_appointment_tool."],
             "expected_tool_calls": [{"name": "reschedule_appointment_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -574,6 +625,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls check_availability_tool for endocrinology."],
             "expected_tool_calls": [{"name": "check_availability_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -590,6 +642,7 @@ FULL_RECORDS = [
                 "The agent acknowledges the confirmed payment.",
                 "The agent does NOT call any tools in response to the payment event.",
             ],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -604,6 +657,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls check_availability_tool for a general checkup on Friday."],
             "expected_tool_calls": [{"name": "check_availability_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -619,6 +673,7 @@ FULL_RECORDS = [
             "expected_facts": [
                 "The agent asks for explicit confirmation of the 9am slot with Dr. Adams before booking.",
             ],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -633,6 +688,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls reserve_slot_tool to book the 9am slot."],
             "expected_tool_calls": [{"name": "reserve_slot_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -647,6 +703,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls cancel_appointment_tool or cancel_reservation_tool."],
             "expected_tool_calls": [{"name": "cancel_appointment_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -661,6 +718,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent calls reschedule_appointment_tool."],
             "expected_tool_calls": [{"name": "reschedule_appointment_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -677,6 +735,7 @@ FULL_RECORDS = [
                 "The agent acknowledges that the payment expired and the reservation was released.",
                 "The agent asks if the user wants to book again.",
             ],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "booking"},
     },
@@ -692,6 +751,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent searches the knowledge base and retrieves the lateness or cancellation policy."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -703,6 +763,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent searches the knowledge base for insurance acceptance information."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
+            "expected_intention": ["booking","reception"],
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -714,9 +775,11 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent searches the knowledge base for available specialties."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
+            "expected_intention": ["faq","reception"],
         },
         "tags": {"agent_under_test": "faq"},
     },
+    #~Duplicated row -  similar one testing coordinator
     {
         "inputs": {
             "user_message": "How much does a dermatology consultation cost?",
@@ -727,7 +790,8 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": ["The agent retrieves dermatology consultation cost information."],
-            "expected_tool_calls": [{"name": "search_faq_tool"}],
+            "expected_tool_calls": [{"name": "search_services_tool"}],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -741,6 +805,7 @@ FULL_RECORDS = [
                 "The agent handles the booking request or directs the user to the booking flow.",
                 "The agent does not refuse the booking request.",
             ],
+            "expected_intention": ["booking"]
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -754,6 +819,7 @@ FULL_RECORDS = [
                 "The agent does NOT provide medical advice.",
                 "The agent recommends consulting a doctor.",
             ],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -763,8 +829,9 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent searches the knowledge base for Medicare acceptance information."],
+            "expected_facts": ["Agent presents Medicare acceptance information."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq"},
     },
@@ -776,8 +843,9 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": [
                 "The agent does NOT provide medical advice.",
-                "The agent recommends consulting a doctor.",
+                "The agent recommends consulting a doctor or calling emergency services.",
             ],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq"},
     },
