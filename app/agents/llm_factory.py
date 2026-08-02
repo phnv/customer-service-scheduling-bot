@@ -20,10 +20,12 @@ import os
 from dotenv import load_dotenv
 from langchain_core.language_models import BaseChatModel
 
+from app.agents.config import AGENT_TEMPERATURE
+
 load_dotenv()
 
 
-def get_llm(temperature: float = 0.0) -> BaseChatModel:
+def get_llm(temperature: float = AGENT_TEMPERATURE) -> BaseChatModel:
     """
     Returns a configured LLM instance based on the LLM_PROVIDER env var.
 

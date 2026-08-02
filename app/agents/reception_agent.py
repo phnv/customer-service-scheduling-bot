@@ -47,7 +47,7 @@ def _get_reception_agent():
         raw_prompt = GLOBAL_PROMPT + "\n\n" + RECEPTION_PROMPT
         final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _reception_react_agent = create_react_agent(
-            model=get_llm(temperature=0.0),
+            model=get_llm(),
             tools=[
                 find_contact_tool,
                 create_contact_tool,

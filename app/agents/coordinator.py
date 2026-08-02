@@ -60,7 +60,7 @@ def coordinator_node(state: AgentState) -> dict[str, Any]:
     """
     logger.info("[Coordinator] Classifying intent...")
 
-    llm = get_llm(temperature=0.0)
+    llm = get_llm()
     structured_llm = llm.with_structured_output(CoordinatorOutput)
 
     # Build prompt variables, injecting the active flow + summary context

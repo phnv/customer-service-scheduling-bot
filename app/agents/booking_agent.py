@@ -48,7 +48,7 @@ def _get_booking_agent():
         raw_prompt = GLOBAL_PROMPT + "\n\n" + BOOKING_PROMPT
         final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _booking_react_agent = create_react_agent(
-            model=get_llm(temperature=0.0),
+            model=get_llm(),
             tools=[
                 check_availability_tool,
                 reserve_slot_tool,

@@ -3,5 +3,3 @@ ESCALATION_MESSAGE = (
     "Someone will contact you shortly to assist you directly. "
     "We appreciate your patience."
 )
-
-DRAFT - do not autocomplete:

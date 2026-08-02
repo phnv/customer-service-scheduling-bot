@@ -39,7 +39,7 @@ def _get_faq_agent():
         raw_prompt = GLOBAL_PROMPT + "\n\n" + FAQ_PROMPT
         final_prompt = render_prompt(raw_prompt, **get_prompt_variables())
         _faq_react_agent = create_react_agent(
-            model=get_llm(temperature=0.0),
+            model=get_llm(),
             tools=[search_faq_tool],
             prompt=final_prompt,
         )
