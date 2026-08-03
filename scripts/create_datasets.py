@@ -46,9 +46,9 @@ from mlflow.genai.datasets import create_dataset, get_dataset
 # Dataset versioning
 # ---------------------------------------------------------------------------
 # v1 = initial schema for the clean MLflow re-implementation (Milestone 10).
-DATASET_VERSION = "v3" # 2nd round of fixes — system event + escalation protocol alignment
-DATASET_NAME = "prompt-eval-v3"
-SANITY_DATASET_NAME = "sanity-check-5q-v3"
+DATASET_VERSION = "v2" # 2nd round of fixes — system event + escalation protocol alignment
+DATASET_NAME = "prompt-eval"
+SANITY_DATASET_NAME = "sanity-check-5q"
 
 tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///evaluation/mlflow.db")
 mlflow.set_tracking_uri(tracking_uri)
@@ -135,7 +135,7 @@ SANITY_RECORDS = [
             "expected_facts": [
                 "The agent recognizes the user's frustration and stops trying to solve the issue automatically.",
                 "The agent informs the user that the issue has been escalated to a human team.",
-                "Chat session ends, no more messages from agent."
+                "The agent apologizes, informs the user about the transfer, and asks for their contact information before escalating."
             ],
             "expected_intention": ["escalation"],
         },
@@ -884,7 +884,7 @@ FULL_RECORDS = [
             "expected_facts": [
                 "The agent apologizes sincerely for the frustration.",
                 "The agent asks for the user's full name and phone number before escalating.",
-                "The agent adds the contact information and escalation reason to the conversation summary.",
+                "The agent asks for the reason and for the user's contact information (name and phone/email)."
             ],
             "expected_intention": ["escalation"],
         },
@@ -902,7 +902,7 @@ FULL_RECORDS = [
             "expected_facts": [
                 "The agent does NOT attempt to update data directly.",
                 "The agent explains that address updates require a human representative.",
-                "The agent confirms the user's name and phone number before escalating.",
+                "The agent does not ask for contact information since it was already provided in the conversation.",
             ],
             "expected_intention": ["escalation"],
         },

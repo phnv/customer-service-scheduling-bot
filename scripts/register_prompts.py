@@ -12,7 +12,7 @@ Prompts registered:
   - reception-prompt     (app/prompts/reception.py   → RECEPTION_PROMPT)
   - booking-prompt       (app/prompts/booking.py     → BOOKING_PROMPT)
   - faq-prompt           (app/prompts/faq.py         → FAQ_PROMPT)
-  - escalation-prompt    (app/prompts/escalation.py  → ESCALATION_MESSAGE)
+  - escalation-prompt    (app/prompts/escalation.py  → ESCALATION_PROMPT)
 
 Note: At runtime the app still imports prompts directly from Python modules.
       mlflow.genai.load_prompt() is used when loading from a registry alias.
@@ -52,7 +52,7 @@ from app.prompts.coordinator import COORDINATOR_PROMPT
 from app.prompts.reception import RECEPTION_PROMPT
 from app.prompts.booking import BOOKING_PROMPT
 from app.prompts.faq import FAQ_PROMPT
-from app.prompts.escalation import ESCALATION_MESSAGE
+from app.prompts.escalation import ESCALATION_PROMPT
 
 # ---------------------------------------------------------------------------
 # Prompts to register
@@ -63,7 +63,7 @@ PROMPTS: list[tuple[str, str]] = [
     ("reception-prompt", RECEPTION_PROMPT),
     ("booking-prompt", BOOKING_PROMPT),
     ("faq-prompt", FAQ_PROMPT),
-    ("escalation-prompt", ESCALATION_MESSAGE),
+    ("escalation-prompt", ESCALATION_PROMPT),
 ]
 
 # Path where latest prompt URIs are persisted for register_model.py

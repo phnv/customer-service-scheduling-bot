@@ -31,11 +31,11 @@ from langgraph.graph import END, START, StateGraph
 
 from app.agents.booking_agent import booking_node
 from app.agents.coordinator import coordinator_node, route_after_coordinator
+from app.agents.escalation_agent import escalation_node
 from app.agents.faq_agent import faq_node
 from app.agents.reception_agent import reception_node
 from app.agents.state import AgentState
 from app.agents.utils import extract_text_content
-from app.prompts import ESCALATION_MESSAGE
 
 logger = logging.getLogger(__name__)
 
@@ -47,23 +47,6 @@ load_dotenv()
 # run_agent() invocation. No manual trace serialization is required.
 # ---------------------------------------------------------------------------
 mlflow.langchain.autolog()
-
-
-# ---------------------------------------------------------------------------
-# Escalation Node (static gateway — not a ReAct agent)
-# ---------------------------------------------------------------------------
-
-def escalation_node(state: AgentState) -> dict[str, Any]:
-    """
-    LangGraph node: returns a static escalation message.
-
-    Per architecture decision: escalation is a gateway node, not an agent.
-    It does not call any LLM or tools.
-    """
-    logger.info("[Escalation] Routing to human escalation.")
-    return {
-        "messages": [AIMessage(content=ESCALATION_MESSAGE)]
-    }
 
 def route_after_reception(state: AgentState) -> str:
     """

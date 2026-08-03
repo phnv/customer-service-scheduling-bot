@@ -24,7 +24,7 @@ The system uses **LangGraph** to coordinate between several specialized agents u
 - **Reception Agent:** Runs before booking to identify or register the contact (bypassed once identity is established).
 - **Booking Agent:** Uses tools to manage appointments and doctor availability.
 - **FAQ Agent:** Uses RAG to answer questions based on clinic documentation.
-- **Escalation Node:** Handles unsupported requests and human handoff.
+- **Escalation Node:** Interactively handles human handoff — apologises, collects contact info, and structures a single-phrase reason before routing to staff.
 
 The architecture is strictly layered:
 `UI (Streamlit) -> Application (ViewModels) -> Agents (LangGraph) -> Tools (Wrappers) -> Services (Business Logic) -> Storage (SQLite/ChromaDB)`
@@ -76,26 +76,95 @@ This will open the chat interface, complete with demo controls for external even
 
 ### 5. Prompt Evaluation
 
-The evaluation pipeline uses **MLflow** with 6 LLM-as-a-Judge scorers backed by OpenAI `gpt-4o-mini`. The chatbot runs on Gemini; these are two independent providers — no proxying between them.
+The evaluation pipeline uses **MLflow** with LLM-as-a-Judge scorers backed by OpenAI `gpt-4o-mini`. The chatbot runs on Gemini; these are two independent providers — no proxying between them.
 
 > **⚠️ IMPORTANT:** You must have both `GEMINI_API_KEY` and `OPENAI_API_KEY` set in your `.env` to run evaluations.
 
-Before running for the first time, register the scorers:
+See [`docs/Milestone 11 - Prompt Evaluation.md`](docs/Milestone%2011%20-%20Prompt%20Evaluation.md) for full implementation details.
+
+---
+
+## Helper Commands
+
+All commands assume you are **inside WSL** with the virtual environment activated:
 
 ```bash
-uv run python scripts/register_scorers.py
+# Enter WSL and activate the virtual environment (always do this first)
+wsl
+source .venv/bin/activate
 ```
 
-Then run the evaluation against the 5-record sanity-check dataset (fast dry run):
+### First-Time Setup
+
+Run these once to initialise the database, seed the FAQ knowledge base, and wire up MLflow:
 
 ```bash
-uv run python scripts/run_evaluation.py
+# 1. Initialise SQLite database with seed data
+PYTHONPATH=. uv run python scripts/init_db.py
+
+# 2. Ingest FAQ documents into ChromaDB (RAG knowledge base)
+PYTHONPATH=. uv run python scripts/ingest.py
 ```
 
-Or against the full 50-record dataset:
+### MLflow LLMOps Workflow
+
+Run these in order whenever prompts change or on a new environment:
 
 ```bash
-uv run python scripts/run_evaluation.py --dataset prompt-eval-v1
+# 3. Create / re-seed evaluation datasets in MLflow
+#    Use --purge to fully replace existing records (e.g. after a schema change)
+uv run python scripts/create_datasets.py
+uv run python scripts/create_datasets.py --purge   # destructive re-seed
+
+# 4. Register built-in scorers to the MLflow experiment
+cd scripts && uv run python setup_scorers.py && cd ..
+
+# 5. Register all agent prompts to the MLflow Prompt Registry
+#    Run this after every prompt change to version it
+uv run python scripts/register_prompts.py
+
+# 6. Register the LangGraph pipeline to the MLflow Model Registry
+#    Must run AFTER register_prompts.py (links model to prompt versions)
+uv run python scripts/register_model.py
 ```
 
-Results are logged to the MLflow experiment and saved to `evaluation_results.csv`. See [`docs/Milestone 13 - Whole MLFlow Implementation.md`](docs/Milestone%2013%20-%20Whole%20MLFlow%20Implementation.md) and [`docs/Milestone 14 - Evaluation Rate Limit Fix.md`](docs/Milestone%2014%20-%20Evaluation%20Rate%20Limit%20Fix.md) for full implementation details.
+### Updating Versions (aliases)
+
+After registering new versions, update the `@champion` alias to keep the application pointing to the right artifacts. Replace `<VERSION>` with the version number printed by the registration scripts:
+
+```bash
+# Promote a new model version to champion
+uv run python scripts/manage_aliases.py model customer-service-scheduling-bot <VERSION> champion
+
+# Promote a specific prompt version to champion
+uv run python scripts/manage_aliases.py prompt coordinator-prompt  <VERSION> champion
+uv run python scripts/manage_aliases.py prompt reception-prompt    <VERSION> champion
+uv run python scripts/manage_aliases.py prompt booking-prompt      <VERSION> champion
+uv run python scripts/manage_aliases.py prompt faq-prompt          <VERSION> champion
+uv run python scripts/manage_aliases.py prompt escalation-prompt   <VERSION> champion
+```
+
+### Run Evaluation
+
+> ⚠️ **User-exclusive prerogative** — never delegated to the AI agent (see `AGENTS.md §11`).
+
+```bash
+# Sanity check — 5 records, Correctness + intention_routing scorers (fast dry run)
+uv run python scripts/run_evaluation.py --dataset sanity
+
+# Full evaluation — 52 records, all 4 built-in scorers + intention_routing
+uv run python scripts/run_evaluation.py --dataset full
+```
+
+Results are logged to the MLflow experiment. Open the MLflow UI to inspect traces and scores:
+
+```bash
+mlflow ui --backend-store-uri sqlite:///evaluation/mlflow.db
+```
+
+### Run the Application
+
+```bash
+PYTHONPATH=. uv run python scripts/run_ui.py
+```
+

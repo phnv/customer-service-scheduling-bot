@@ -52,10 +52,15 @@ class ChatApplication:
             retrieved_docs=state.get("retrieved_docs")
         )
         
+        alerts = []
+        if state.get("escalation_reason"):
+            alerts.append(f"Escalation Triggered: {state['escalation_reason']}")
+
         return ChatViewModel(
             message=response,
             conversation_id=conversation_id,
             buttons=buttons,
+            alerts=alerts,
             payment_url=state.get("ui_payment_url"),
             debug=debug
         )

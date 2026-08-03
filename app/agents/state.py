@@ -56,6 +56,9 @@ class AgentState(TypedDict):
     # Populated by the FAQ Agent's RAG tool to pass context to the UI
     retrieved_docs: Optional[list[dict]]
 
+    # Set by the Escalation agent to record the single-phrase reason for human handoff
+    escalation_reason: Optional[str]
+
     # --- UI Demo Flags ---
     ui_payment_url: Optional[str]
     ui_show_confirm_payment: bool
