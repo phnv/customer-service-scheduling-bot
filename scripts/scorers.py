@@ -40,16 +40,18 @@ def get_sanity_scorers():
         intention_routing,
     ]
 
-
-def get_full_scorers():
-    """Returns the complete suite of scorers."""
+def get_builtin_scorers():
+    """Returns the built-in LLM judges for automatic evaluation (can be registered)."""
     return [
         Correctness(inference_params=INFERENCE_PARAMS),
         RelevanceToQuery(inference_params=INFERENCE_PARAMS),
         ToolCallCorrectness(inference_params=INFERENCE_PARAMS),
         ToolCallEfficiency(inference_params=INFERENCE_PARAMS),
-        intention_routing,
     ]
+
+def get_full_scorers():
+    """Returns the complete suite of scorers for offline evaluation."""
+    return get_builtin_scorers() + [intention_routing]
 
 # # test instantiation
 # get_full_scorers()

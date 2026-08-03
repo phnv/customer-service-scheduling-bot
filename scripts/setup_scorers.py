@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import mlflow
-from scorers import get_full_scorers
+from scorers import get_builtin_scorers
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -42,7 +42,7 @@ mlflow.set_experiment(experiment_name)
 #   - ToolCallCorrectness: Did the agent call the right tools with the right args?
 #   - ToolCallEfficiency:  Did the agent avoid redundant/duplicate tool calls?
 # ---------------------------------------------------------------------------
-SCORERS = get_full_scorers()
+SCORERS = get_builtin_scorers()
 
 
 def main() -> None:
