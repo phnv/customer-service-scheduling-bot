@@ -46,7 +46,9 @@ from mlflow.genai.datasets import create_dataset, get_dataset
 # Dataset versioning
 # ---------------------------------------------------------------------------
 # v1 = initial schema for the clean MLflow re-implementation (Milestone 10).
-DATASET_VERSION = "v2" # 2nd round of fixes — system event + escalation protocol alignment
+# v2 = 2nd round of fixes — system event + escalation protocol alignment
+
+DATASET_VERSION = "v3"  # v3 = reflects escalation node upgrade
 DATASET_NAME = "prompt-eval"
 SANITY_DATASET_NAME = "sanity-check-5q"
 

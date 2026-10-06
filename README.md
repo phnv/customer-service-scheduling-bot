@@ -149,7 +149,7 @@ uv run python scripts/manage_aliases.py prompt escalation-prompt   <VERSION> cha
 > ⚠️ **User-exclusive prerogative** — never delegated to the AI agent (see `AGENTS.md §11`).
 
 ```bash
-# Sanity check — 5 records, Correctness + intention_routing scorers (fast dry run)
+# Sanity check — 5 records, Correctness + intention_routing scorers (fast run)
 uv run python scripts/run_evaluation.py --dataset sanity
 
 # Full evaluation — 52 records, all 4 built-in scorers + intention_routing

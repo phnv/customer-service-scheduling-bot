@@ -25,8 +25,8 @@ def escalation_node(state: AgentState) -> dict[str, Any]:
     logger.info("[Escalation] Handling escalation protocol.")
     
     # 1. Prepare prompts
-    variables = get_prompt_variables()
-    system_prompt = render_prompt(GLOBAL_PROMPT + "\n\n" + ESCALATION_PROMPT, variables)
+    raw_prompt = GLOBAL_PROMPT + "\n\n" + ESCALATION_PROMPT
+    system_prompt = render_prompt(raw_prompt, **get_prompt_variables())
     
     # 2. Extract messages (system + history)
     messages = [{"role": "system", "content": system_prompt}] + state.get("messages", [])

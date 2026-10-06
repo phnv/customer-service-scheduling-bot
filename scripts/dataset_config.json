@@ -1,12 +1,12 @@
 {
-  "version": "v2",
+  "version": "v3",
   "datasets": {
     "sanity": {
-      "name": "sanity-check-5q-v2",
+      "name": "sanity-check-5q",
       "description": "5-record sanity check — Correctness scorer only"
     },
     "full": {
-      "name": "prompt-eval-v2",
+      "name": "prompt-eval",
       "description": "50-record full evaluation — all 4 scorers"
     }
   }
