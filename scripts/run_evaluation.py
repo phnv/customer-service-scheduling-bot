@@ -168,11 +168,17 @@ def run_evaluation(dataset_key: str) -> None:
     predict_fn = _get_predict_fn()
 
     print("Running evaluation...")
-    results = mlflow.genai.evaluate(
-        data=df,
-        predict_fn=predict_fn,
-        scorers=scorers,
-    )
+    with mlflow.start_run() as run:
+        # Dynamically get the model ID based on the active provider
+        provider = os.getenv("LLM_PROVIDER", "gemini").upper()
+        model_id = os.getenv(f"{provider}_MODEL", "unknown")
+        mlflow.set_tag("llm_model_id", model_id)
+        
+        results = mlflow.genai.evaluate(
+            data=df,
+            predict_fn=predict_fn,
+            scorers=scorers,
+        )
 
     print("=" * 60)
     print("Evaluation complete.")

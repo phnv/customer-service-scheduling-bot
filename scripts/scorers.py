@@ -5,6 +5,9 @@ Shared MLflow scorers configuration for evaluation.
 # pyrefly: ignore [missing-import]
 from mlflow.genai import scorer
 from mlflow.entities import Trace
+import os
+from dotenv import load_dotenv
+
 from mlflow.genai.scorers import (
     Correctness,
     RelevanceToQuery,
@@ -12,7 +15,11 @@ from mlflow.genai.scorers import (
     ToolCallEfficiency,
 )
 
+load_dotenv()
+
 INFERENCE_PARAMS = {"temperature": 0}
+if max_tokens := os.getenv("LLM_JUDGE_MAX_TOKENS"):
+    INFERENCE_PARAMS["max_tokens"] = int(max_tokens)
 
 @scorer
 def intention_routing(trace: Trace, expectations: dict) -> bool | None:
