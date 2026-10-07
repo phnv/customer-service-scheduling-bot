@@ -4,7 +4,7 @@ Shared MLflow scorers configuration for evaluation.
 
 # pyrefly: ignore [missing-import]
 from mlflow.genai import scorer
-from mlflow.entities import Trace
+from mlflow.entities import Feedback, Trace
 import os
 from dotenv import load_dotenv
 
@@ -22,23 +22,39 @@ if max_tokens := os.getenv("LLM_JUDGE_MAX_TOKENS"):
     INFERENCE_PARAMS["max_tokens"] = int(max_tokens)
 
 @scorer
-def intention_routing(trace: Trace, expectations: dict) -> bool | None:
-    """Deterministic custom scorer to verify intention routing."""
+def intention_routing(trace: Trace, expectations: dict) -> Feedback | None:
+    """Deterministic custom scorer to verify intention routing.
+
+    The Feedback carries `expected`/`actual` in its metadata so that
+    scripts/eval_report.py can build a routing confusion table.
+    """
     expected_intention = expectations.get("expected_intention")
     if not expected_intention:
         return None
-        
+
+    expected = ",".join(expected_intention)
     coordinator_spans = trace.search_spans(name="coordinator")
     if not coordinator_spans:
-        return False
-        
+        return Feedback(
+            name="intention_routing",
+            value=False,
+            rationale="No coordinator span found in the trace.",
+            metadata={"expected": expected, "actual": "none"},
+        )
+
     outputs = coordinator_spans[0].outputs
     if isinstance(outputs, dict):
         actual_intent = outputs.get("intent")
     else:
         actual_intent = getattr(outputs, "intent", None) or str(outputs)
-        
-    return actual_intent in expected_intention
+
+    passed = actual_intent in expected_intention
+    return Feedback(
+        name="intention_routing",
+        value=passed,
+        rationale=f"expected one of [{expected}], coordinator routed to '{actual_intent}'.",
+        metadata={"expected": expected, "actual": str(actual_intent)},
+    )
 
 def get_sanity_scorers():
     """Returns scorers for the sanity check dataset."""
