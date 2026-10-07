@@ -187,6 +187,10 @@ def run_evaluation(dataset_key: str) -> None:
     print(f"  mlflow ui --backend-store-uri {tracking_uri}")
     print("=" * 60)
 
+    # Auto-triage: root-cause report + trace tags (triage.*). See scripts/eval_report.py.
+    from eval_report import generate_report
+    generate_report(results.run_id)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

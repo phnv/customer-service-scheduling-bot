@@ -156,6 +156,16 @@ uv run python scripts/run_evaluation.py --dataset sanity
 uv run python scripts/run_evaluation.py --dataset full
 ```
 
+At the end of every run, `scripts/eval_report.py` generates an **auto-triage report** (no LLM calls): scorer pass rates, root causes in pipeline order (`ROUTING → TOOL_USE → CONTENT → RELEVANCE → TOOL_EFFICIENCY`), a routing confusion table, judge-suspect cases and a short "inspect first" list. It also tags each trace (`triage.priority`, `triage.root_cause`, `triage.judge_suspect`) and logs `triage/report.md` + `triage/cases.csv` to the run. Local copy: `evaluation/reports/<run_id>.md`.
+
+```bash
+# Regenerate for any past run (read-only analysis; --no-write skips tagging / logging)
+uv run python scripts/eval_report.py --latest
+uv run python scripts/eval_report.py --run-id <run_id> --baseline <older_run_id>
+```
+
+In the MLflow UI Traces tab, filter e.g. ``tag.`triage.priority` = 'HIGH'`` instead of scrolling every trace.
+
 Results are logged to the MLflow experiment. Open the MLflow UI to inspect traces and scores:
 
 ```bash
