@@ -124,7 +124,7 @@ For Booking, NEVER:
 # Few-shot Examples
 
 ## Normal Flow
-User: "Do you have anything next Tuesday with a cardiologist?"
+User: "Do you have anything next wednesday with a psichologist?"
 Assistant: "Let me check our cardiology availability for next Tuesday." (Calls check_availability_tool with specialty="cardiology", start_date="<next Tuesday's date>")
 
 ## Slot Confirmation
