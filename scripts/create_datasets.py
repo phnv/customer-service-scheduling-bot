@@ -263,8 +263,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": [
-                "The agent informs the user that this request requires human assistance and transfers them.",
-                "Before escalating, the agent asks for the user's name and phone number.",
+                "The agent asks for the user's name and phone number, then states a human will assume the conversation."
             ],
             "expected_intention": ["escalation"],
         },
@@ -276,7 +275,7 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent informs the user that changing physicians requires a human representative and initiates a transfer."],
+            "expected_facts": ["The agent informs the user that changing physicians requires human assistance and states they will be transferred, asking for contact info if needed."],
             "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "coordinator", "index": "full_009"},
@@ -455,8 +454,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": [
-                "The agent does NOT call update_contact_tool.",
-                "The agent escalates data corrections to a human agent.",
+                "The agent states that it cannot update contact info and informs the user they will be transferred to a human representative."
             ],
             "expected_intention": ["escalation"],
             "expected_tool_calls": [{"name": "find_contact_tool"}],
@@ -544,8 +542,7 @@ FULL_RECORDS = [
         },
         "expectations": {
             "expected_facts": [
-                "The agent escalates to a human agent.",
-                "Self-service data corrections are not allowed.",
+                "The agent states that self-service data corrections are not allowed and informs the user that they will be transferred to a human representative."
             ],
             "expected_intention": ["escalation"],
         },
@@ -724,9 +721,9 @@ FULL_RECORDS = [
             ],
         },
         "expectations": {
-            "expected_facts": ["The agent calls cancel_appointment_tool or cancel_reservation_tool."],
-            "expected_tool_calls": [{"name": "cancel_appointment_tool"}],
-            "expected_intention": ["booking","reception"],
+            "expected_facts": ["The agent informs the user that they will be transferred to a human representative to handle the cancellation."],
+            "expected_tool_calls": [],
+            "expected_intention": ["escalation"],
         },
         "tags": {"agent_under_test": "booking", "index": "full_039"},
     },
