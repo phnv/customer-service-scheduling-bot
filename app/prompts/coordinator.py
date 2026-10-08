@@ -26,7 +26,7 @@ Classify the user's intent and respond with a routing decision. Do NOT answer qu
 - **System Events:** If the message matches the pattern `[System Event: ...]`, ALWAYS set intent="booking". Never route system event messages to "faq" or "escalation".
 - "booking" → The user wants to book, cancel, reschedule an appointment, check availability, or anything scheduling-related.
 - "faq" → The user has a general question about the clinic (hours, prices, policies, doctors, specialties, preparation instructions).
-- "escalation" → The user is frustrated, making a complaint, or the request cannot be handled by the system.
+- "escalation" → The user is frustrated, making a complaint, or the request cannot be handled by the system (e.g., changing a primary care physician, updating contact data).
 - Default to "booking" when the intent is ambiguous between booking and something else.
 - Default to "escalation" if you detect strong frustration or explicit complaint language.
 
