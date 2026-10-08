@@ -493,7 +493,10 @@ FULL_RECORDS = [
     {
         "inputs": {
             "user_message": "I forgot my patient ID.",
-            "conversation_history": [],
+            "conversation_history": [
+                {"role": "user", "content": "I need an appointment."},
+                {"role": "assistant", "content": "Sure, could you provide your patient ID?"},
+            ],
         },
         "expectations": {
             "expected_facts": ["The agent asks for alternative identifiers such as full name and phone or email."],
@@ -612,6 +615,8 @@ FULL_RECORDS = [
         "inputs": {
             "user_message": "Yes, please book it.",
             "conversation_history": [
+                {"role": "user", "content": "Hi, I'm John Doe, +15550001234. Do you have anything next Tuesday with a cardiologist?"},
+                {"role": "assistant", "content": "Welcome back John! Here are the available cardiology slots for next Tuesday:\n- Dr. Silva at 10:00 AM\n- Dr. Brooks at 11:00 AM"},
                 {"role": "user", "content": "The 10am slot with Dr. Silva works."},
                 {"role": "assistant", "content": "To confirm — you'd like the 10:00 AM slot with Dr. Silva on Tuesday. Is that correct?"},
             ],
@@ -724,7 +729,9 @@ FULL_RECORDS = [
         "inputs": {
             "user_message": "Yes, that's correct.",
             "conversation_history": [
-                {"role": "user", "content": "I want the 9am slot with Dr. Adams."},
+                {"role": "user", "content": "Do you have anything this Friday for a checkup?"},
+                {"role": "assistant", "content": "Here are the available slots for Friday:\n- Dr. Adams at 09:00 AM\n- Dr. Adams at 14:00"},
+                {"role": "user", "content": "I want the 9am slot with Dr. Adams. I am John Doe, +15550001234."},
                 {"role": "assistant", "content": "To confirm — you'd like the 09:00 AM slot with Dr. Adams on Friday. Is that correct?"},
             ],
         },
@@ -794,7 +801,7 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent searches the knowledge base and retrieves the lateness or cancellation policy."],
+            "expected_facts": ["The agent provides the lateness or cancellation policy."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
             "expected_intention": ["faq"],
         },
@@ -808,7 +815,7 @@ FULL_RECORDS = [
         "expectations": {
             "expected_facts": ["The agent provides information about insurance acceptance."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
-            "expected_intention": ["booking","reception"],
+            "expected_intention": ["faq"],
         },
         "tags": {"agent_under_test": "faq", "index": "full_043"},
     },
@@ -818,7 +825,7 @@ FULL_RECORDS = [
             "conversation_history": [],
         },
         "expectations": {
-            "expected_facts": ["The agent searches the knowledge base for available specialties."],
+            "expected_facts": ["The agent provides information about available specialties."],
             "expected_tool_calls": [{"name": "search_faq_tool"}],
             "expected_intention": ["faq","reception"],
         },
